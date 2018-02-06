@@ -30,7 +30,7 @@ using namespace Robot;
 
 // Torque adaption every second
 const int TORQUE_ADAPTION_CYCLES = 1000 / MotionModule::TIME_UNIT;
-const int DEST_TORQUE = 1023;
+const int DEST_TORQUE = 2047;
 
 //#define LOG_VOLTAGES 1
 
@@ -70,7 +70,17 @@ bool MotionManager::Initialize(dynamixel::PacketHandler *packetHandler, dynamixe
 	m_Enabled = false;
 	m_ProcessEnable = true;
 
+//Modo de Operação dos motores para controlar a posição e torque(atraves da corrente).
+  m_CM730->write1ByteTxRx(portHandler, 7, MX28::P_OPERATING_MODE, 5, &dxl_error);
 
+//Os motores não ligam se não der o Torque Enable.
+  m_CM730->write1ByteTxRx(portHandler, BROADCAST_ID, MX28::P_TORQUE_ENABLE, 1, &dxl_error);
+
+//When the absolute value of Present Velocity(128) is greater than the Moving Threshold(24), Moving(122) is set to ‘1’, otherwise it is cleared to ‘0’.
+  m_CM730->write4ByteTxRx(portHandler, BROADCAST_ID, MX28::P_MOVING_THRESHOULD, 20, &dxl_error);
+
+//Valor do Goal Current para os motores iniciarem o código "quase" soltos, se não pode dar o tranco.
+  m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_GOAL_CURRENT, 2, &dxl_error);
 /*
 	if(m_CM730->Connect() == false)
 	{
@@ -220,13 +230,33 @@ void MotionManager::SaveINISettings(minIni* ini, const std::string &section)
 #define MARGIN_OF_SD        2.0
 void MotionManager::Process()
 {
-	//printf("entrou\n");
-  /*
+
     if(m_fadeIn && m_torque_count < DEST_TORQUE) {
-        m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_TORQUE_LIMIT_L, m_torque_count, 0);
-        m_torque_count += 2;
-    }
+      //printf("entrou\n");
+        if(m_torque_count < 100)
+            m_torque_count += 1;
+        else
+            m_torque_count += 10;
+
+        //m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_TORQUE_LIMIT_L, m_torque_count, 0);
+        //m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_VELOCITY_LIMIT, m_torque_count, &dxl_error);
+        m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_CURRENT_LIMIT, 2047, &dxl_error);
+        m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_GOAL_CURRENT, m_torque_count, &dxl_error);
+/*
+        m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_GOAL_POSITION, 2048, &dxl_error);
+
+        uint16_t voltage;
+        uint16_t current;
+
+        m_CM730->read2ByteTxRx(portHandler, 7, MX28::P_PRESENT_VOLTAGE, &voltage, &dxl_error);
+        m_CM730->read2ByteTxRx(portHandler, 7, MX28::P_PRESENT_CURRENT, &current, &dxl_error);
+
+        std::cout<<"m_torque_count "<<int (m_torque_count)<<std::endl;
+        std::cout<<"tenso "<<voltage<<std::endl;
+        std::cout<<"current "<<current<<std::endl;
 */
+    }
+
     if(m_ProcessEnable == false || m_IsRunning == true)
         return;
 
@@ -334,6 +364,7 @@ void MotionManager::Process()
 		if(DEBUG_PRINT == true)
 		fprintf(stderr, "ID[%d] : %d \n", id, MotionStatus::m_CurrentJoints.GetValue(id));
 	}
+
 	if(joint_num > 0)
 #ifdef MX28_1024
             //m_CM730->SyncWrite(MX28::P_CW_COMPLIANCE_SLOPE, MX28::PARAM_BYTES, joint_num, param);
@@ -358,13 +389,15 @@ void MotionManager::Process()
 
 void MotionManager::SetEnable(bool enable)
 {
-  /*
+
 	//printf("entrou\n");
+  uint32_t valor = 200;
 	m_Enabled = enable;
 	if(m_Enabled == true)
-		m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_MOVING_SPEED_L, 200, 0);
+		//m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_MOVING_SPEED_L, 200, 0);
+    m_CM730->write4ByteTxRx(portHandler, BROADCAST_ID, MX28::P_MOVING_THRESHOULD, valor, &dxl_error);
 		//m_CM730->WriteWord(1, 30, 900, 0);
-    */
+
 }
 
 void MotionManager::AddModule(MotionModule *module)
@@ -392,42 +425,42 @@ void MotionManager::adaptTorqueToVoltage()
 {
 	static int count_fail=0;
 	static int count_volt=0;
-    const int DEST_TORQUE = 1023;
-    const int FULL_TORQUE_VOLTAGE = 210; // 13V - at 13V darwin will make no adaptation as the standard 3 cell battery is always below this voltage, this implies Nimbro-OP runs on 4 cells
+  const int DEST_TORQUE = 1023;
+  const int FULL_TORQUE_VOLTAGE = 210; // 13V - at 13V darwin will make no adaptation as the standard 3 cell battery is always below this voltage, this implies Nimbro-OP runs on 4 cells
 
-    uint16_t voltage;
-		// torque is only reduced if it is greater then FULL_TORQUE_VOLTAGE
+  uint16_t voltage;
+	// torque is only reduced if it is greater then FULL_TORQUE_VOLTAGE
 	//if(m_CM730->ReadByte(7, 42, &voltage, 0) != CM730::SUCCESS && m_CM730->ReadByte(8, 42, &voltage, 0) != CM730::SUCCESS)
-  if(m_CM730->read2ByteTxRx(portHandler, 7, 144, &voltage, &dxl_error) != COMM_SUCCESS && m_CM730->read2ByteTxRx(portHandler, 8, 144, &voltage, &dxl_error) != COMM_SUCCESS)
+  if(m_CM730->read2ByteTxRx(portHandler, 7, MX28::P_PRESENT_VOLTAGE, &voltage, &dxl_error) != COMM_SUCCESS && m_CM730->read2ByteTxRx(portHandler, 7, MX28::P_PRESENT_VOLTAGE, &voltage, &dxl_error) != COMM_SUCCESS)
 	{
     	count_fail++;
-    	if(count_fail>=4)
+    	if(count_fail>=7)
     	{
     		printf("Falha na comunicação: Chave provavelmente desligada\n");
     		logServo(); //Escreve no arquivo de log a hora que terminou o processo
     		exit(0);
     	}
-       	return;
-    }
-    count_fail=0;
+      return;
+  }
+  count_fail=0;
 
-    if(voltage < 100)
-    {
-        count_volt++;
-        if(count_volt>=4)
-        {
+  if(voltage < 100)
+  {
+      count_volt++;
+      if(count_volt>=4)
+      {
 		    printf("Tensão Abaixo do recomendado | Tensão = %2.1fV\n", (float)voltage/(float)10);
 		    printf("A bateria deve ser trocada\n");
 		    logVoltage(voltage); //Escreve no arquivo de log a tensão e a hora que terminou o processo
 		    exit(0);
-		}
-    }
-    else
-        count_volt=0;
-    write_int(mem, VOLTAGE, voltage);
+		  }
+  }
+  else
+      count_volt=0;
+  write_int(mem, VOLTAGE, voltage);
 
     //if(m_CM730->ReadByte(200, CM730::P_VOLTAGE, &voltage, 0) != CM730::SUCCESS)
-        return;
+  return;
 
     voltage = (voltage > FULL_TORQUE_VOLTAGE) ? voltage : FULL_TORQUE_VOLTAGE;
     m_voltageAdaptionFactor = ((double)FULL_TORQUE_VOLTAGE) / voltage;

@@ -246,7 +246,6 @@ int main(int argc, char **argv)
     if (variables.count("k")) //verifica se foi chamado o argumento de controle pelo teclado
     {
     //-------------iniciando o modulo de andar pelo teclado------------------------------------------
-        std::cout << "blablab" << '\n';
         buffer=0;
         while(1)
         {
@@ -383,7 +382,7 @@ int main(int argc, char **argv)
             }
 
           //if (Action::GetInstance()->IsRunning()==0 && Walking::GetInstance()->IsRunning()==0 && check_servo(&cm730, idServo, stop_gait)!=0)
-          if ((Action::GetInstance()->IsRunning()==0 && Walking::GetInstance()->IsRunning()==0 && check_servo(packetHandler, portHandler))!=0)
+          if ((Action::GetInstance()->IsRunning()==0 && Walking::GetInstance()->IsRunning()==0)); //&& check_servo(packetHandler, portHandler))!=0)
                 return 0;
 
         }

@@ -44,7 +44,7 @@ namespace Robot
 
 	AngleEstimator m_angleEstimator;
 	bool m_fadeIn;
-	int m_torque_count;
+	uint16_t m_torque_count;
 
 	FILE* m_voltageLog;
 
