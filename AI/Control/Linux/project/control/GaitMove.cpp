@@ -11,7 +11,7 @@
 * @e-mail isaac25silva@yahoo.com.br
 * @brief gait 😛
 ****************************************************************************
-**************************************************************************** 
+****************************************************************************
 Arquivo fonte contendo metodos de movimentos do gait
 /--------------------------------------------------------------------------*/
 
@@ -71,7 +71,7 @@ void GaitMove::move_gait(float X_amplitude, float Y_amplitude, float A_amplitude
         Action::GetInstance()->Stop();
         Walking::GetInstance()->m_Joint.SetEnableBody(true);
         Action::GetInstance()->m_Joint.SetEnableBody(false);
-        MotionStatus::m_CurrentJoints.SetEnableBodyWithoutHead(true);	
+        MotionStatus::m_CurrentJoints.SetEnableBodyWithoutHead(true);
         Walking::GetInstance()->X_MOVE_AMPLITUDE = gait->walk_foward;
         Walking::GetInstance()->Y_MOVE_AMPLITUDE = gait->sidle;
         Walking::GetInstance()->A_MOVE_AMPLITUDE = gait->turn_angle;
@@ -94,6 +94,7 @@ void GaitMove::move_gait(float X_amplitude, float Y_amplitude, float A_amplitude
 //Do the gait staing int the place----------------------------------------
 void GaitMove::Gait_in_place(bool &stop_gait, bool same_moviment)
 {
+    //std::cout << "teste" << '\n';
     write_int(mem, CONTROL_ACTION, 11);
     if(same_moviment == false) //Imprime na tela se o movimento nao foi repetido
         std::cout<<" | \e[38;5;45mStop com gait\e[0m"<<std::endl;
@@ -249,7 +250,3 @@ void GaitMove::walk_backward_slow(bool &stop_gait, bool max_speed, bool same_mov
     else
         move_gait(-walkbackwardslow->walk_foward, walkbackwardslow->sidle, walkbackwardslow->turn_angle, stop_gait, walkbackwardslow);
 }
-
-
-
-

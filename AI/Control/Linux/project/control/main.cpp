@@ -249,7 +249,6 @@ int main(int argc, char **argv)
         buffer=0;
         while(1)
         {
-
             int key = kbhit();
             usleep(20*1000);
 
@@ -260,16 +259,14 @@ int main(int argc, char **argv)
                     buffer=key;
                 else
                     buffer=0;
-		same_moviment=false;
+		            same_moviment=false;
             }
             else
-	    {
+	          {
                 key=buffer;
-		same_moviment=true;
-	    }
+		            same_moviment=true;
+	          }
             //-------------------------------------------------------------------------
-
-
 
             switch(key)
             {
@@ -380,11 +377,11 @@ int main(int argc, char **argv)
                 break;
 
             }
-
+/*
           //if (Action::GetInstance()->IsRunning()==0 && Walking::GetInstance()->IsRunning()==0 && check_servo(&cm730, idServo, stop_gait)!=0)
-          if ((Action::GetInstance()->IsRunning()==0 && Walking::GetInstance()->IsRunning()==0)); //&& check_servo(packetHandler, portHandler))!=0)
+          if ((Action::GetInstance()->IsRunning()==0 && Walking::GetInstance()->IsRunning()==0 && check_servo(packetHandler, portHandler))!=0)
                 return 0;
-
+*/
         }
     }
     //==========================================================================================
@@ -636,11 +633,12 @@ int check_servo(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler 
     if (i==JointData::NUMBER_OF_JOINTS-2) //Ultimo motor: 18
         i=1;
 
-    if (i<=6){ // Membro superiores ate 6
+    if (i<=6)// Membro superiores ate 6
+    {
         //if(cm730->ReadWord(i, MX28::P_TORQUE_LIMIT, &save, 0)!=0)
-        //if(packetHandler->read4ByteTxRx(portHandler, i, MX28::P_VELOCITY_LIMIT, &save, &dxl_error) != 0)
+        //if(packetHandler->read2ByteTxRx(portHandler, i, MX28::P_GOAL_CURRENT, &save, &dxl_error) != 0)
 
-          if (dxl_comm_result != COMM_SUCCESS)
+        if (dxl_comm_result != COMM_SUCCESS)
         {
             cout<<"Perda na comunicação com o motor "<<i<<" - Membro superior"<<endl;
             usleep(500000);
@@ -672,10 +670,11 @@ int check_servo(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler 
         }
     }
     else{ // Membro inferiores, do 7 em diante
-    uint32_t save;
+    uint16_t save;
         //if(cm730->ReadWord(i, MX28::P_TORQUE_LIMIT_L, &save, 0)!=0)
-        if(packetHandler->read4ByteTxRx(portHandler, i, MX28::P_VELOCITY_LIMIT, &save, &dxl_error) != 0)
+        if(packetHandler->read2ByteTxRx(portHandler, i, MX28::P_GOAL_CURRENT, &save, &dxl_error) != 0)
         {
+
             cout<<"Perda na comunicação com o motor "<<i<<" - Membro inferior"<<endl;
             usleep(500000);
             return 0;
@@ -685,6 +684,7 @@ int check_servo(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler 
         {
             uint8_t save;
             //if(cm730->ReadWord(i, MX28::P_PRESENT_TEMPERATURE, &save, 0)!=0)
+
             if(packetHandler->read1ByteTxRx(portHandler, i, MX28::P_PRESENT_TEMPERATURE, &save, &dxl_error) != 0)
             {
                 cout<<"Perda na comunicação com o motor "<<i<<" - Membro inferior"<<endl;

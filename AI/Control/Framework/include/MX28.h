@@ -33,7 +33,7 @@ namespace Robot
 		static const double RATIO_VALUE2ANGLE = 0.088; // 360 / 4096
 		static const double RATIO_ANGLE2VALUE = 11.378; // 4096 / 360
 
-		static const int PARAM_BYTES = 7;
+		static const int PARAM_BYTES = 5;
 #endif
 
         static int GetMirrorValue(int value)		{ return MAX_VALUE + 1 - value; }

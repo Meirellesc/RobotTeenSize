@@ -71,7 +71,7 @@ bool MotionManager::Initialize(dynamixel::PacketHandler *packetHandler, dynamixe
 	m_ProcessEnable = true;
 
 //Modo de Operação dos motores para controlar a posição e torque(atraves da corrente).
-  m_CM730->write1ByteTxRx(portHandler, 7, MX28::P_OPERATING_MODE, 5, &dxl_error);
+  m_CM730->write1ByteTxRx(portHandler, BROADCAST_ID, MX28::P_OPERATING_MODE, 5, &dxl_error);
 
 //Os motores não ligam se não der o Torque Enable.
   m_CM730->write1ByteTxRx(portHandler, BROADCAST_ID, MX28::P_TORQUE_ENABLE, 1, &dxl_error);
@@ -79,8 +79,27 @@ bool MotionManager::Initialize(dynamixel::PacketHandler *packetHandler, dynamixe
 //When the absolute value of Present Velocity(128) is greater than the Moving Threshold(24), Moving(122) is set to ‘1’, otherwise it is cleared to ‘0’.
   m_CM730->write4ByteTxRx(portHandler, BROADCAST_ID, MX28::P_MOVING_THRESHOULD, 20, &dxl_error);
 
+//Declarando o valor limite de corrente dos motores, no caso 2047 é o máx.
+  m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_CURRENT_LIMIT, 2047, &dxl_error);
+
 //Valor do Goal Current para os motores iniciarem o código "quase" soltos, se não pode dar o tranco.
-  m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_GOAL_CURRENT, 2, &dxl_error);
+  m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_GOAL_CURRENT, 2, &dxl_error);
+
+//Declarando o valor limite da velocidade usado pelo P_PROFILE_VELOCITY.
+  m_CM730->write4ByteTxRx(portHandler, BROADCAST_ID, MX28::P_VELOCITY_LIMIT, 1023, &dxl_error);
+
+  //Declarando o valor limite da aceleração usado pelo P_PROFILE_ACCELERATION.
+  m_CM730->write4ByteTxRx(portHandler, BROADCAST_ID, MX28::P_ACCELERATION_LIMIT, 32767, &dxl_error);
+
+/*TESTE DA VELOCIDADE DO SERVO
+  while(1){
+  m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_GOAL_CURRENT, 2047, &dxl_error);
+
+  m_CM730->write4ByteTxRx(portHandler, BROADCAST_ID, MX28::P_PROFILE_VELOCITY, 50, &dxl_error);
+
+  m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_GOAL_POSITION, 2048, &dxl_error);
+}
+*/
 /*
 	if(m_CM730->Connect() == false)
 	{
@@ -236,13 +255,11 @@ void MotionManager::Process()
         if(m_torque_count < 100)
             m_torque_count += 1;
         else
-            m_torque_count += 10;
+            m_torque_count = 2047 ;
 
         //m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_TORQUE_LIMIT_L, m_torque_count, 0);
-        //m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_VELOCITY_LIMIT, m_torque_count, &dxl_error);
-        m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_CURRENT_LIMIT, 2047, &dxl_error);
-        m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_GOAL_CURRENT, m_torque_count, &dxl_error);
-/*
+        m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_GOAL_CURRENT, m_torque_count, &dxl_error);
+/*TESTE PARA LIGAR O SERVO
         m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_GOAL_POSITION, 2048, &dxl_error);
 
         uint16_t voltage;
@@ -322,7 +339,7 @@ void MotionManager::Process()
 				if((*i)->m_Joint.GetEnable(id) == true)
 				{
 //				MotionStatus::m_CurrentJoints.SetSlope(id, (*i)->m_Joint.GetCWSlope(id), (*i)->m_Joint.GetCCWSlope(id));
-//				MotionStatus::m_CurrentJoints.SetValue(id, (*i)->m_Joint.GetValue(id));
+         MotionStatus::m_CurrentJoints.SetValue(id, (*i)->m_Joint.GetValue(id));
 				 MotionStatus::m_CurrentJoints.SetPGain(id, (*i)->m_Joint.GetPGain(id));
 				 MotionStatus::m_CurrentJoints.SetIGain(id, (*i)->m_Joint.GetIGain(id));
 				 MotionStatus::m_CurrentJoints.SetDGain(id, (*i)->m_Joint.GetDGain(id));
@@ -343,10 +360,12 @@ void MotionManager::Process()
 		if(MotionStatus::m_CurrentJoints.GetEnable(id) == true)
 		{
                 param[n++] = uint8_t(id);
+                /*
 #ifdef MX28_1024
                 param[n++] = MotionStatus::m_CurrentJoints.GetCWSlope(id);
                 param[n++] = MotionStatus::m_CurrentJoints.GetCCWSlope(id);
 #else
+
                 param[n++] = uint8_t (MotionStatus::m_CurrentJoints.GetDGain(id));
                 param[n++] = uint8_t (MotionStatus::m_CurrentJoints.GetIGain(id));
                 int p_gain = uint8_t (m_voltageAdaptionFactor * MotionStatus::m_CurrentJoints.GetPGain(id));
@@ -354,27 +373,53 @@ void MotionManager::Process()
                     p_gain = uint8_t(1);
                 param[n++] = uint8_t(p_gain);
                 param[n++] = uint8_t(0);
+
 #endif
                 //param[n++] = uint8_t(CM730::GetLowByte(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
                 //param[n++] = uint8_t(CM730::GetHighByte(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
+*/
+                param[n++] = DXL_LOBYTE(DXL_LOWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
+                param[n++] = DXL_HIBYTE(DXL_LOWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
+                param[n++] = DXL_LOBYTE(DXL_HIWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
+                param[n++] = DXL_HIBYTE(DXL_HIWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
+
+/*
                 param[n++] = uint8_t(DXL_LOBYTE(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
                 param[n++] = uint8_t(DXL_HIBYTE(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
+*/
 								joint_num++;
 		}
+
+    //std::cout << "valor motor fdp 13: " << MotionStatus::m_CurrentJoints.GetValue(13) + m_Offset[13] << '\n';
+//TESTE COM O PID
+    m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_POSITION_D_GAIN, (MotionStatus::m_CurrentJoints.GetDGain(13)), &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_POSITION_I_GAIN, (MotionStatus::m_CurrentJoints.GetIGain(13)), &dxl_error);
+
+    int p_gain = uint16_t (m_voltageAdaptionFactor * (MotionStatus::m_CurrentJoints.GetPGain(13)));
+    if(p_gain <= 0)
+        p_gain = uint16_t(1);
+    m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_POSITION_P_GAIN, p_gain, &dxl_error);
+
+//teste da aceleração
+    m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_PROFILE_ACCELERATION, 10000, &dxl_error);
+    m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_GOAL_POSITION, 2046, &dxl_error);
+
+
 		if(DEBUG_PRINT == true)
 		fprintf(stderr, "ID[%d] : %d \n", id, MotionStatus::m_CurrentJoints.GetValue(id));
 	}
-
+/*
 	if(joint_num > 0)
 #ifdef MX28_1024
             //m_CM730->SyncWrite(MX28::P_CW_COMPLIANCE_SLOPE, MX28::PARAM_BYTES, joint_num, param);
             //m_CM730->syncWriteTxOnly(portHandler, MX28::P_CW_COMPLIANCE_SLOPE, MX28::PARAM_BYTES, joint_num, param);
 #else
             //m_CM730->SyncWrite(MX28::P_POSITION_D_GAIN, MX28::PARAM_BYTES, joint_num, param);
-            m_CM730->syncWriteTxOnly(portHandler, MX28::P_POSITION_D_GAIN, MX28::PARAM_BYTES, param, joint_num);
+            //m_CM730->syncWriteTxOnly(portHandler, MX28::P_POSITION_D_GAIN, MX28::PARAM_BYTES, param, joint_num  * (1 + MX28::PARAM_BYTES));
+            m_CM730->syncWriteTxOnly(portHandler, MX28::P_GOAL_POSITION, MX28::PARAM_BYTES, param, joint_num * (1 + MX28::PARAM_BYTES));
 #endif
 
-
+*/
 	}
 
 
@@ -391,11 +436,11 @@ void MotionManager::SetEnable(bool enable)
 {
 
 	//printf("entrou\n");
-  uint32_t valor = 200;
+  uint32_t valor = 1020; //declarado "0" -= velocidade infinita.
 	m_Enabled = enable;
 	if(m_Enabled == true)
 		//m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_MOVING_SPEED_L, 200, 0);
-    m_CM730->write4ByteTxRx(portHandler, BROADCAST_ID, MX28::P_MOVING_THRESHOULD, valor, &dxl_error);
+    m_CM730->write4ByteTxRx(portHandler, BROADCAST_ID, MX28::P_PROFILE_VELOCITY, valor, &dxl_error);
 		//m_CM730->WriteWord(1, 30, 900, 0);
 
 }
@@ -433,6 +478,7 @@ void MotionManager::adaptTorqueToVoltage()
 	//if(m_CM730->ReadByte(7, 42, &voltage, 0) != CM730::SUCCESS && m_CM730->ReadByte(8, 42, &voltage, 0) != CM730::SUCCESS)
   if(m_CM730->read2ByteTxRx(portHandler, 7, MX28::P_PRESENT_VOLTAGE, &voltage, &dxl_error) != COMM_SUCCESS && m_CM730->read2ByteTxRx(portHandler, 7, MX28::P_PRESENT_VOLTAGE, &voltage, &dxl_error) != COMM_SUCCESS)
 	{
+
     	count_fail++;
     	if(count_fail>=7)
     	{
@@ -464,13 +510,14 @@ void MotionManager::adaptTorqueToVoltage()
 
     voltage = (voltage > FULL_TORQUE_VOLTAGE) ? voltage : FULL_TORQUE_VOLTAGE;
     m_voltageAdaptionFactor = ((double)FULL_TORQUE_VOLTAGE) / voltage;
-    int torque = m_voltageAdaptionFactor * DEST_TORQUE;
+    uint16_t torque = m_voltageAdaptionFactor * DEST_TORQUE;
 
 #if LOG_VOLTAGES
     fprintf(m_voltageLog, "%3d       %4d\n", voltage, torque);
 #endif
 
     //m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_TORQUE_LIMIT_L, torque, 0);
+    m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_GOAL_CURRENT, torque, &dxl_error);
 }
 
 void MotionManager::logVoltage(int voltage)
