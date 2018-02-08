@@ -355,6 +355,7 @@ void MotionManager::Process()
   uint8_t param [JointData::NUMBER_OF_JOINTS * (1 + MX28::PARAM_BYTES)]; // ID(1) + DATA(data_length)
 	int n = 0;
 	uint16_t joint_num = 0;
+  uint32_t present;
 
 	for(uint8_t id=JointData::ID_MIN; id<=JointData::ID_MAX; id++)
 	{
@@ -414,10 +415,15 @@ void MotionManager::Process()
 	}
 
 	if(joint_num > 0)
+
+
     m_CM730->syncWriteTxOnly(portHandler, MX28::P_GOAL_POSITION, MX28::PARAM_BYTES, param, (joint_num  * (1 + MX28::PARAM_BYTES)));
 
-    std::cout << "valor motor 7: " << MotionStatus::m_CurrentJoints.GetValue(7) + m_Offset[7] << '\n';
+    std::cout << "goal 7: " << MotionStatus::m_CurrentJoints.GetValue(7) + m_Offset[7] << '\n';
 
+    m_CM730->read4ByteTxRx(portHandler, 7, MX28::P_PRESENT_POSITION, &present, &dxl_error);
+
+    std::cout << "present 7: " << present << '\n';
   /*
   #ifdef MX28_1024
             //m_CM730->SyncWrite(MX28::P_CW_COMPLIANCE_SLOPE, MX28::PARAM_BYTES, joint_num, param);

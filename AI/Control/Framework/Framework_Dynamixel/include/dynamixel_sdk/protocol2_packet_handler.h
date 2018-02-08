@@ -493,7 +493,7 @@ class WINDECLSPEC Protocol2PacketHandler : public PacketHandler
   /// @param error Dynamixel hardware error
   /// @return communication results which come from Protocol2PacketHandler::txRxPacket()
   ////////////////////////////////////////////////////////////////////////////////
-  int regWriteTxRx   (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error = 0);
+  int regWriteTxRx        (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error = 0);
 
 
   ////////////////////////////////////////////////////////////////////////////////

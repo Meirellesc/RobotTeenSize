@@ -30,7 +30,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <iostream>
 
 #define TXPACKET_MAX_LEN    (4*1024)
 #define RXPACKET_MAX_LEN    (4*1024)
@@ -162,7 +161,6 @@ void Protocol2PacketHandler::printRxPacketError(uint8_t error)
 
 unsigned short Protocol2PacketHandler::updateCRC(uint16_t crc_accum, uint8_t *data_blk_ptr, uint16_t data_blk_size)
 {
-  //std::cout<<"crc: "<<"data_blk_ptr="<<*data_blk_ptr<<" | data_blk_size="<<data_blk_size<<std::endl;
   uint16_t i;
   uint16_t crc_table[256] = {0x0000,
   0x8005, 0x800F, 0x000A, 0x801B, 0x001E, 0x0014, 0x8011,
@@ -208,8 +206,7 @@ unsigned short Protocol2PacketHandler::updateCRC(uint16_t crc_accum, uint8_t *da
     i = ((uint16_t)(crc_accum >> 8) ^ *data_blk_ptr++) & 0xFF;
     crc_accum = (crc_accum << 8) ^ crc_table[i];
   }
-  //std::cout<<"crc_accum="<<crc_accum<<std::endl;
-  //getchar();
+
   return crc_accum;
 }
 
@@ -714,7 +711,7 @@ int Protocol2PacketHandler::readTxRx(PortHandler *port, uint8_t id, uint16_t add
   {
     if (error != 0)
       *error = (uint8_t)rxpacket[PKT_ERROR];
-
+    
     for (uint16_t s = 0; s < length; s++)
     {
       data[s] = rxpacket[PKT_PARAMETER0 + 1 + s];
