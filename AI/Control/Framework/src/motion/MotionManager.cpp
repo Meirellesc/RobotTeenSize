@@ -11,7 +11,7 @@
 ****************************************************************************
 ****************************************************************************
 ---------------------------------------------------------------------------*/
-
+#include <iomanip>
 #include <stdio.h>
 #include <math.h>
 #include "FSR.h"
@@ -249,16 +249,16 @@ void MotionManager::SaveINISettings(minIni* ini, const std::string &section)
 #define MARGIN_OF_SD        2.0
 void MotionManager::Process()
 {
-
     if(m_fadeIn && m_torque_count < DEST_TORQUE) {
       //printf("entrou\n");
         if(m_torque_count < 100)
-            m_torque_count += 1;
+            m_torque_count += 3;
         else
             m_torque_count = 2047 ;
 
         //m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_TORQUE_LIMIT_L, m_torque_count, 0);
         m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_GOAL_CURRENT, m_torque_count, &dxl_error);
+
 /*TESTE PARA LIGAR O SERVO
         m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_GOAL_POSITION, 2048, &dxl_error);
 
@@ -350,16 +350,17 @@ void MotionManager::Process()
 	}
 	//uint8_t param[JointData::NUMBER_OF_JOINTS * MX28::PARAM_BYTES];
 
-  //uint8_t param [18 * (1 + 7)];
+  //param = new uint8_t[21 * (1 + 5)];
+
   uint8_t param [JointData::NUMBER_OF_JOINTS * (1 + MX28::PARAM_BYTES)]; // ID(1) + DATA(data_length)
 	int n = 0;
 	uint16_t joint_num = 0;
 
-	for(int id=JointData::ID_MIN; id<=JointData::ID_MAX; id++)
+	for(uint8_t id=JointData::ID_MIN; id<=JointData::ID_MAX; id++)
 	{
 		if(MotionStatus::m_CurrentJoints.GetEnable(id) == true)
 		{
-                param[n++] = uint8_t(id);
+                param[n++] = (id);
                 /*
 #ifdef MX28_1024
                 param[n++] = MotionStatus::m_CurrentJoints.GetCWSlope(id);
@@ -378,48 +379,57 @@ void MotionManager::Process()
                 //param[n++] = uint8_t(CM730::GetLowByte(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
                 //param[n++] = uint8_t(CM730::GetHighByte(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
 */
-                param[n++] = DXL_LOBYTE(DXL_LOWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
-                param[n++] = DXL_HIBYTE(DXL_LOWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
-                param[n++] = DXL_LOBYTE(DXL_HIWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
-                param[n++] = DXL_HIBYTE(DXL_HIWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
+                param[n++] = (DXL_LOBYTE(DXL_LOWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id])));
+                param[n++] = (DXL_HIBYTE(DXL_LOWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id])));
+                param[n++] = (DXL_LOBYTE(DXL_HIWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id])));
+                param[n++] = (DXL_HIBYTE(DXL_HIWORD(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id])));
 
 /*
                 param[n++] = uint8_t(DXL_LOBYTE(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
                 param[n++] = uint8_t(DXL_HIBYTE(MotionStatus::m_CurrentJoints.GetValue(id) + m_Offset[id]));
 */
 								joint_num++;
-		}
 
-    //std::cout << "valor motor fdp 13: " << MotionStatus::m_CurrentJoints.GetValue(13) + m_Offset[13] << '\n';
-//TESTE COM O PID
-    m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_POSITION_D_GAIN, (MotionStatus::m_CurrentJoints.GetDGain(13)), &dxl_error);
-    m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_POSITION_I_GAIN, (MotionStatus::m_CurrentJoints.GetIGain(13)), &dxl_error);
 
-    int p_gain = uint16_t (m_voltageAdaptionFactor * (MotionStatus::m_CurrentJoints.GetPGain(13)));
-    if(p_gain <= 0)
-        p_gain = uint16_t(1);
-    m_CM730->write2ByteTxRx(portHandler, 7, MX28::P_POSITION_P_GAIN, p_gain, &dxl_error);
+//TESTE COM O PID = UTILIZANDO O PID OS MOTORES NÃO FICAM TRAVADOS NA POSIÇÃO DESEJADA COM A CORRENTE MÁXIMA.
 
-//teste da aceleração
+                m_CM730->write2ByteTxRx(portHandler, id, MX28::P_POSITION_D_GAIN, (MotionStatus::m_CurrentJoints.GetDGain(id)), &dxl_error);
+                m_CM730->write2ByteTxRx(portHandler, id, MX28::P_POSITION_I_GAIN, (MotionStatus::m_CurrentJoints.GetIGain(id)), &dxl_error);
+
+                int p_gain = uint16_t (m_voltageAdaptionFactor * (MotionStatus::m_CurrentJoints.GetPGain(id)));
+                  if(p_gain <= 0)
+                    p_gain = uint16_t(1);
+                m_CM730->write2ByteTxRx(portHandler, id, MX28::P_POSITION_P_GAIN, p_gain, &dxl_error);
+    }
+/*
+//TESTE DA VELOCIDADE COM A ACELERAÇÃO.
+    m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_PROFILE_VELOCITY, 1000, &dxl_error);
     m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_PROFILE_ACCELERATION, 10000, &dxl_error);
-    m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_GOAL_POSITION, 2046, &dxl_error);
+    //m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_GOAL_POSITION, 700, &dxl_error);
+*/
 
 
 		if(DEBUG_PRINT == true)
 		fprintf(stderr, "ID[%d] : %d \n", id, MotionStatus::m_CurrentJoints.GetValue(id));
 	}
-/*
+
 	if(joint_num > 0)
-#ifdef MX28_1024
+    m_CM730->syncWriteTxOnly(portHandler, MX28::P_GOAL_POSITION, MX28::PARAM_BYTES, param, (joint_num  * (1 + MX28::PARAM_BYTES)));
+
+    std::cout << "valor motor 7: " << MotionStatus::m_CurrentJoints.GetValue(7) + m_Offset[7] << '\n';
+
+  /*
+  #ifdef MX28_1024
             //m_CM730->SyncWrite(MX28::P_CW_COMPLIANCE_SLOPE, MX28::PARAM_BYTES, joint_num, param);
             //m_CM730->syncWriteTxOnly(portHandler, MX28::P_CW_COMPLIANCE_SLOPE, MX28::PARAM_BYTES, joint_num, param);
-#else
+
+  #else
             //m_CM730->SyncWrite(MX28::P_POSITION_D_GAIN, MX28::PARAM_BYTES, joint_num, param);
             //m_CM730->syncWriteTxOnly(portHandler, MX28::P_POSITION_D_GAIN, MX28::PARAM_BYTES, param, joint_num  * (1 + MX28::PARAM_BYTES));
-            m_CM730->syncWriteTxOnly(portHandler, MX28::P_GOAL_POSITION, MX28::PARAM_BYTES, param, joint_num * (1 + MX28::PARAM_BYTES));
-#endif
-
+            m_CM730->syncWriteTxOnly(portHandler, MX28::P_GOAL_POSITION, MX28::PARAM_BYTES, param, (joint_num  * 6));
+  #endif
 */
+
 	}
 
 
