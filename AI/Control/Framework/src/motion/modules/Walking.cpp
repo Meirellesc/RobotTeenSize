@@ -51,13 +51,13 @@ Walking::Walking()
 
 	X_MOVE_AMPLITUDE = 0;
 	Y_MOVE_AMPLITUDE = 0;
-	A_MOVE_AMPLITUDE = 0;	
+	A_MOVE_AMPLITUDE = 0;
 	A_MOVE_AIM_ON = false;
 	BALANCE_ENABLE = true;
 	LOWER_VELADJ_LIMIT = -8;
 	UPPER_VELADJ_LIMIT = 3;
 	speedAdj = 0;
-	
+
 	m_Joint.SetAngle(JointData::ID_R_SHOULDER_PITCH, -10.00);
 	m_Joint.SetAngle(JointData::ID_L_SHOULDER_PITCH, 10.00);
 	m_Joint.SetAngle(JointData::ID_R_SHOULDER_ROLL, -15.10);
@@ -372,7 +372,7 @@ void Walking::Stop()
 {
 	m_Ctrl_Running = false;
 }
-		
+
 bool Walking::IsRunning()
 {
 	return m_Real_Running;
@@ -389,7 +389,7 @@ void Walking::Process()
 	double TIME_UNIT = MotionModule::TIME_UNIT;
 	//                     R_HIP_YAW, R_HIP_ROLL, R_HIP_PITCH, R_KNEE, R_ANKLE_PITCH, R_ANKLE_ROLL, L_HIP_YAW, L_HIP_ROLL, L_HIP_PITCH, L_KNEE, L_ANKLE_PITCH, L_ANKLE_ROLL, R_ARM_SWING, L_ARM_SWING
 //	int dir[14]          = {   -1,         1,          1,         1,         -1,           -1,          -1,         1,         -1,         -1,         1,           -1,           1,           -1      };
-	int dir[14]          = {   -1,        -1,          1,         1,         -1,            1,          -1,        -1,         -1,         -1,         1,            1,           1,           -1      };
+	int dir[14]          = {   -1,        -1,          1,         1,         -1,            1,          -1,        -1,         -1,         -1,         -1,            1,           1,           -1      };
     double initAngle[14] =     {   0.0,       0.0,        0.0,       0.0,        0.0,          0.0,         0.0,       0.0,        0.0,        0.0,       0.0,          0.0,         -55,           55    };
 	int outValue[14];
 
@@ -617,10 +617,10 @@ void Walking::Process()
 
         outValue[3] -= dir[3] * fbGyroErr * BALANCE_KNEE_GAIN; // R_KNEE
         outValue[9] -= dir[9] * fbGyroErr * BALANCE_KNEE_GAIN; // L_KNEE
-        
+
         outValue[4] -= dir[4] * fbGyroErr * BALANCE_ANKLE_PITCH_GAIN; // R_ANKLE_PITCH
-        outValue[10] -= dir[10] * fbGyroErr * BALANCE_ANKLE_PITCH_GAIN; // L_ANKLE_PITCH        
-        
+        outValue[10] -= dir[10] * fbGyroErr * BALANCE_ANKLE_PITCH_GAIN; // L_ANKLE_PITCH
+
         outValue[5] -= dir[5] * rlGyroErr * BALANCE_ANKLE_ROLL_GAIN; // R_ANKLE_ROLL
         outValue[11] -= dir[11] * rlGyroErr * BALANCE_ANKLE_ROLL_GAIN; // L_ANKLE_ROLL
 #else
