@@ -60,20 +60,25 @@ void sighandler(int sig)
 
 //////////////////// Framework Initialize ////////////////////////////
 // ---- Open USBDynamixel -----------------------------------------------{
-int Initialize_servo(char *string1)
+// int Initialize_servo(char *string1)
+int Initialize_servo(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
 {
     bool servoConectado = false;
     int idServo;
     sprintf(string1,"/dev/robot/body");
-    LinuxCM730* linux_cm730;
-    linux_cm730 = new LinuxCM730(string1);
-    CM730* cm730;
-    cm730 = new CM730(linux_cm730);
+    // LinuxCM730* linux_cm730;
+    // linux_cm730 = new LinuxCM730(string1);
+    // CM730* cm730;
+    // cm730 = new CM730(linux_cm730);
 
-    if( MotionManager::GetInstance()->Initialize(cm730) == 0)
+    std::vector<uint8_t> vec;
+    int dxl_comm_result = COMM_TX_FAIL;
+
+    // if( MotionManager::GetInstance()->Initialize(cm730) == 0)
+    if(MotionManager::GetInstance()->Initialize(packetHandler, portHandler) == 0)
     { // not connect with board rs485
         std::cout<<"\e[1;31mNão há nenhuma placa USB/RS-485 conectada no computador.\n\n\e[0m"<<std::endl;
-		return -1;
+		      return -1;
     }
     else
     {
@@ -88,7 +93,7 @@ int Initialize_servo(char *string1)
 		    }
 			usleep(1000);
 		}
-           
+
     }
     printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com nenhum servo.\e[0m\n");
     std::cout<<"Endereço: "<<"/dev/robot/body"<<std::endl;
@@ -156,10 +161,10 @@ int main(int argc, char *argv[])
     }
     sleep(1);
     MotionManager::GetInstance()->memBB = mem;
-   //================================================================================== 
+   //==================================================================================
 
 
-    MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());	
+    MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());
     linuxMotionTimer.Initialize(MotionManager::GetInstance());
 	linuxMotionTimer.Stop();
 	//MotionManager::GetInstance()->StopThread();
@@ -270,7 +275,7 @@ int main(int argc, char *argv[])
                     else if(strcmp(cmd, "n") == 0)
                         NextCmd();
                     else if(strcmp(cmd, "b") == 0)
-                        PrevCmd();						
+                        PrevCmd();
                     else if(strcmp(cmd, "time") == 0)
                         TimeCmd();
                     else if(strcmp(cmd, "speed") == 0)

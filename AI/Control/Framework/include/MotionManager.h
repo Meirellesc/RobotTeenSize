@@ -15,7 +15,8 @@
 #include "MotionModule.h"
 #include "minIni.h"
 #include "AngleEstimator.h"
-#include "dynamixel_sdk.h"
+#include "../Framework_Dynamixel/include/dynamixel_sdk/dynamixel_sdk.h" 
+
 
 #define OFFSET_SECTION "Offset"
 #define INVALID_VALUE   -1024.0

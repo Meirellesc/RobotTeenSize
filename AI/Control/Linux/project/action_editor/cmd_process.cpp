@@ -9,6 +9,7 @@
 #include "minIni.h"
 #include <stdlib.h>     /* system, NULL, EXIT_FAILURE */
 
+
 #define INI_FILE_PATH       "../../../Data/config.ini"
 
 using namespace Robot;
@@ -87,7 +88,7 @@ void set_stdin(void)
 {
 	tcgetattr(0,&oldterm);
 	new_term = oldterm;
-	new_term.c_lflag &= ~(ICANON | ECHO | ISIG); // ÀÇ¹Ì´Â struct termios¸¦ Ã£À¸¸é µÊ.
+	new_term.c_lflag &= ~(ICANON | ECHO | ISIG); // ï¿½Ç¹Ì´ï¿½ struct termiosï¿½ï¿½ Ã£ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½.
 	new_term.c_cc[VMIN] = 1;
 	new_term.c_cc[VTIME] = 0;
 	tcsetattr(0, TCSANOW, &new_term);
@@ -98,19 +99,24 @@ void reset_stdin(void)
 	tcsetattr(0, TCSANOW, &oldterm);
 }
 
-void ReadStep(CM730 *cm730)
+// void ReadStep(CM730 *cm730)
+void ReadStep(dynamixel::PacketHandler *packetHandler)
 {
-	int value;
+	uint8_t value8;
+	uint32_t value32;
+	dxl_error = 0;
 	for(int id=0; id<31; id++)
 	{
 		if(id >= JointData::ID_MIN && id <= JointData::ID_MAX)
 		{
-			if(cm730->ReadByte(id, MX28::P_TORQUE_ENABLE, &value, 0) == CM730::SUCCESS)
+			//if(cm730->ReadByte(id, MX28::P_TORQUE_ENABLE, &value, 0) == CM730::SUCCESS)
+			if(packetHandler->read1ByteTxRx(portHandler, id, MX28::P_TORQUE_ENABLE, &value8, &dxl_error) == COMM_SUCCESS)
 			{
-				if(value == 1)
+				if(value8 == 1)
 				{
-					if(cm730->ReadWord(id, MX28::P_GOAL_POSITION_L, &value, 0) == CM730::SUCCESS)
-						Step.position[id] = value - MotionManager::GetInstance()->m_Offset[id];
+					// if(cm730->ReadWord(id, MX28::P_GOAL_POSITION_L, &value, 0) == CM730::SUCCESS)
+					if(packetHandler->read4ByteTxRx(portHandler, id, MX28::P_GOAL_POSITION, &value32, &dxl_error) == COMM_SUCCESS)
+						Step.position[id] = value32 - MotionManager::GetInstance()->m_Offset[id];
 					else
 						Step.position[id] = Action::INVALID_BIT_MASK;
 				}
@@ -280,7 +286,8 @@ void MoveRightCursor()
 	}
 }
 
-void DrawIntro(CM730 *cm730)
+// void DrawIntro(CM730 *cm730)
+void DrawIntro(dynamixel::PacketHandler *packetHandler)
 {
 	int nrows, ncolumns;
     setupterm(NULL, fileno(stdout), (int *)0);
@@ -297,12 +304,12 @@ void DrawIntro(CM730 *cm730)
 	printf("\n");
 	printf("Press any key to start program...\n");
 	_getch();
-	
+
 	system("printf '\e[8;27;80t'");
 
 	Action::GetInstance()->LoadPage(indexPage, &Page);
 
-	ReadStep(cm730);	
+	ReadStep(packetHandler);
 	Step.pause = 0;
 	Step.time = 0;
 
@@ -352,7 +359,7 @@ void DrawPage()
 		printf( "   Speed          [    ]                                                       \n" );//1
 	else if( Page.header.schedule == Action::TIME_BASE_SCHEDULE )
 		printf( "   Time(x 8msec)  [    ]                                                       \n" );//1
-	
+
 	printf( "                   STP7  STP0 STP1 STP2 STP3 STP4 STP5 STP6                    \n" );//2
 	printf( "]                                                                              " );  // 3
 
@@ -372,7 +379,7 @@ void DrawPage()
 
 	GoToCursor( PAGEPARAM_COL, STEPNUM_ROW );
 	printf( "%.3d", Page.header.stepnum );
-		
+
 	GoToCursor( PAGEPARAM_COL, PLAYSPEED_ROW );
 	printf( "%.3d", Page.header.speed );
 
@@ -457,9 +464,9 @@ void DrawStep(int index)
 	for( int id=JointData::ID_R_SHOULDER_PITCH; id<JointData::NUMBER_OF_JOINTS; id++ )
 	{
 		GoToCursor(col, id -1);
-		if(step->position[id] + MotionManager::GetInstance()->m_Offset[id] & Action::INVALID_BIT_MASK)
+		if((step->position[id] + MotionManager::GetInstance()->m_Offset[id]) & Action::INVALID_BIT_MASK)
 			printf("----");
-		else if(step->position[id] + MotionManager::GetInstance()->m_Offset[id] & Action::TORQUE_OFF_BIT_MASK)
+		else if((step->position[id] + MotionManager::GetInstance()->m_Offset[id]) & Action::TORQUE_OFF_BIT_MASK)
 			printf("????");
 		else if(step->position[id]  < 0)
 			printf("%.3d", step->position[id]);
@@ -472,7 +479,7 @@ void DrawStep(int index)
 
 	GoToCursor(col, SPEED_ROW);
 	printf("%4.3d", step->time);
-	
+
 	GoToCursor( old_col, old_row );
 }
 
@@ -544,7 +551,7 @@ void DrawName()
 
 	for(int i=0; i<Action::MAXNUM_NAME; i++)
 		printf("%c", (char)Page.header.name[i]);
-	
+
 	GoToCursor( old_col, old_row );
 }
 
@@ -565,9 +572,11 @@ void PrintCmd(const char *message)
 	GoToCursor(len + 2, CMD_ROW);
 }
 
-void UpDownValue(CM730 *cm730, int offset)
+// void UpDownValue(CM730 *cm730, int offset)
+void UpDownValue(dynamixel::PacketHandler *packetHandler, int offset)
 {
-	SetValue(cm730, GetValue() + offset);
+	// SetValue(cm730, GetValue() + offset);
+	SetValue(packetHandler, GetValue() + offset);
 }
 
 int GetValue()
@@ -658,7 +667,8 @@ int GetValue()
 	return -1;
 }
 
-void SetValue(CM730 *cm730, int value)
+// void SetValue(CM730 *cm730, int value)
+void SetValue(dynamixel::PacketHandler *packetHandler, uint32_t value)
 {
 	int col;
 	int row;
@@ -699,12 +709,13 @@ void SetValue(CM730 *cm730, int value)
 		{
 			if(value  + MotionManager::GetInstance()->m_Offset[row + 1] >= 0 && value  + MotionManager::GetInstance()->m_Offset[row + 1] <= MX28::MAX_VALUE)
 			{
-				if(!(Step.position[row + 1] + MotionManager::GetInstance()->m_Offset[row + 1] & Action::INVALID_BIT_MASK) && !(Step.position[row + 1] + MotionManager::GetInstance()->m_Offset[row + 1]  & Action::TORQUE_OFF_BIT_MASK))
+				if(!((Step.position[row + 1] + MotionManager::GetInstance()->m_Offset[row + 1]) & Action::INVALID_BIT_MASK) && !((Step.position[row + 1] + MotionManager::GetInstance()->m_Offset[row + 1])  & Action::TORQUE_OFF_BIT_MASK))
 				{
 					int error;
-					if(cm730->WriteWord(row + 1, MX28::P_GOAL_POSITION_L, value  + MotionManager::GetInstance()->m_Offset[row + 1], &error) == CM730::SUCCESS)
+					// if(cm730->WriteWord(row + 1, MX28::P_GOAL_POSITION_L, value  + MotionManager::GetInstance()->m_Offset[row + 1], &error) == CM730::SUCCESS)
+					if(packetHandler->write4ByteTxRx(portHandler, (row+1), MX28::P_GOAL_POSITION, value  + MotionManager::GetInstance()->m_Offset[row + 1], &dxl_error) == COMM_SUCCESS)
 					{
-						if(!(error & CM730::ANGLE_LIMIT))
+						if(!(error))
 						{
 							Step.position[row + 1] = value;
 							if(value > 0)
@@ -776,7 +787,7 @@ void SetValue(CM730 *cm730, int value)
 		{
 			if(value  + MotionManager::GetInstance()->m_Offset[row + 1] >= 0 && value  + MotionManager::GetInstance()->m_Offset[row + 1] <= MX28::MAX_VALUE) //Aumentando o valor da entrada
 			{
-				if(!(Page.step[i].position[row + 1] + MotionManager::GetInstance()->m_Offset[row + 1] & Action::INVALID_BIT_MASK))
+				if(!((Page.step[i].position[row + 1] + MotionManager::GetInstance()->m_Offset[row + 1]) & Action::INVALID_BIT_MASK))
 				{
 					Page.step[i].position[row + 1] = value;
 					if(value > 0)
@@ -786,7 +797,7 @@ void SetValue(CM730 *cm730, int value)
 					bEdited = true;
 				}
 			}
-		}		
+		}
 	}
 	else if(col == CWSLOPE_COL)
 	{
@@ -871,23 +882,25 @@ void SetValue(CM730 *cm730, int value)
 		}
 	}
 
-	GoToCursor(col, row);	
+	GoToCursor(col, row);
 }
 
-void ToggleTorque(CM730 *cm730)
+void ToggleTorque(dynamixel::PacketHandler *packetHandler)
 {
 	if(Col != STP7_COL || Row > ID_20_ROW)
 		return;
 
 	int id = Row + 1;
 
-	if(Step.position[id] + MotionManager::GetInstance()->m_Offset[id] & Action::TORQUE_OFF_BIT_MASK)
+	if((Step.position[id] + MotionManager::GetInstance()->m_Offset[id]) & Action::TORQUE_OFF_BIT_MASK)
 	{
-		if(cm730->WriteByte(id, MX28::P_TORQUE_ENABLE, 1, 0) != CM730::SUCCESS)
+		//if(cm730->WriteByte(id, MX28::P_TORQUE_ENABLE, 1, 0) != CM730::SUCCESS)
+		if(packetHandler->write1ByteTxRx(portHandler, id, MX28::P_TORQUE_ENABLE, 1, &dxl_error) != COMM_SUCCESS)
 			return;
 
-		int value;
-		if(cm730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &value, 0) != CM730::SUCCESS)
+		uint32_t value;
+		// if(cm730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &value, 0) != CM730::SUCCESS)
+		if(packetHandler->read4ByteTxRx(portHandler, id, MX28::P_PRESENT_POSITION, &value, &dxl_error) != COMM_SUCCESS)
 			return;
 
 		Step.position[id] = value;
@@ -895,7 +908,8 @@ void ToggleTorque(CM730 *cm730)
 	}
 	else
 	{
-		if(cm730->WriteByte(id, MX28::P_TORQUE_ENABLE, 0, 0) != CM730::SUCCESS)
+		// if(cm730->WriteByte(id, MX28::P_TORQUE_ENABLE, 0, 0) != CM730::SUCCESS)
+		if(packetHandler->write4ByteTxRx(portHandler, id, MX28::P_TORQUE_ENABLE, 0, &dxl_error) != COMM_SUCCESS)
 			return;
 
 		Step.position[id] = Action::TORQUE_OFF_BIT_MASK;
@@ -1004,9 +1018,9 @@ void SpeedCmd()
 	DrawPage();
 }
 
-void PlayCmd(CM730 *cm730)
+void PlayCmd(dynamixel::PacketHandler *packetHandler)
 {
-	int value;	
+	// int value;
 
 
 	PrintCmd("Playing... ('s' to stop, 'b' to brake)");
@@ -1026,7 +1040,7 @@ void PlayCmd(CM730 *cm730)
 		return;
 	}
 
-	set_stdin();	
+	set_stdin();
 	while(1)
 	{
 		if(Action::GetInstance()->IsRunning() == false)
@@ -1050,20 +1064,20 @@ void PlayCmd(CM730 *cm730)
 				fprintf(stderr, "\r] Playing... ('s' to stop, 'b' to brake)");
 		}
 
-		usleep(10000);	
+		usleep(10000);
 	}
 	reset_stdin();
 
 	MotionManager::GetInstance()->SetEnable(false);
 	//MotionManager::GetInstance()->StopThread();
 	linuxMotionTimer.Stop();
-	
+
 	GoToCursor(CMD_COL, CMD_ROW);
 	PrintCmd("Done.");
-	
+
 	usleep(10000);
 
-	ReadStep(cm730);
+	ReadStep(packetHandler);
 	DrawStep(7);
 }
 
@@ -1072,7 +1086,7 @@ void ListCmd()
 	int old_col = Col;
 	int old_row = Row;
 	int index = 0;
-	
+
 	while(1)
 	{
 		system("clear");
@@ -1080,7 +1094,7 @@ void ListCmd()
 		{
 			for(int j=0; j<4; j++)
 			{
-				int k = (index * 88) + (j*22 + i);				
+				int k = (index * 88) + (j*22 + i);
 				Action::PAGE page;
 				if(Action::GetInstance()->LoadPage(k, &page) == true)
 				{
@@ -1131,23 +1145,26 @@ void ListCmd()
 	}
 }
 
-void OnOffCmd(CM730 *cm730, bool on, int num_param, int *list)
+// void OnOffCmd(CM730 *cm730, bool on, int num_param, int *list)
+void OnOffCmd(dynamixel::PacketHandler *packetHandler, bool on, int num_param, int *list)
 {
 	if(num_param == 0)
 	{
 		for(int id=JointData::ID_R_SHOULDER_PITCH; id<JointData::NUMBER_OF_JOINTS; id++)
-			cm730->WriteByte(id, MX28::P_TORQUE_ENABLE, (int)on, 0);
+			// cm730->WriteByte(id, MX28::P_TORQUE_ENABLE, (int)on, 0);
+			packetHandler->write1ByteTxRx(portHandler, id, MX28::P_TORQUE_ENABLE, (uint8_t)on, &dxl_error);
 	}
 	else
 	{
 		for(int i=0; i<num_param; i++)
 		{
 			if(list[i] >= JointData::ID_R_SHOULDER_PITCH && list[i] <= JointData::ID_HEAD_TILT)
-				cm730->WriteByte(list[i], MX28::P_TORQUE_ENABLE, (int)on, 0);
+				// cm730->WriteByte(list[i], MX28::P_TORQUE_ENABLE, (int)on, 0);
+				packetHandler->write1ByteTxRx(portHandler, list[i], MX28::P_TORQUE_ENABLE, (uint8_t)on, &dxl_error);
 		}
 	}
 
-	ReadStep(cm730);
+	ReadStep(packetHandler);
 	DrawStep(7);
 }
 
@@ -1155,7 +1172,7 @@ void WriteStepCmd(int index)
 {
 	for(int id=JointData::ID_R_SHOULDER_PITCH; id<JointData::NUMBER_OF_JOINTS; id++)
 	{
-		if(Step.position[id] + MotionManager::GetInstance()->m_Offset[id] & Action::TORQUE_OFF_BIT_MASK)
+		if((Step.position[id] + MotionManager::GetInstance()->m_Offset[id]) & Action::TORQUE_OFF_BIT_MASK)
 			return;
 	}
 
@@ -1185,7 +1202,7 @@ void DeleteStepCmd(int index)
 			}
 			else
 				Page.step[i] = Page.step[i + 1];
-			
+
 			DrawStep(i);
 		}
 
@@ -1212,8 +1229,8 @@ void InsertStepCmd(int index)
 {
 	for(int id=JointData::ID_R_SHOULDER_PITCH; id<JointData::NUMBER_OF_JOINTS; id++)
 	{
-		if(Step.position[id] + MotionManager::GetInstance()->m_Offset[id] & Action::TORQUE_OFF_BIT_MASK)
-		{			
+		if((Step.position[id] + MotionManager::GetInstance()->m_Offset[id]) & Action::TORQUE_OFF_BIT_MASK)
+		{
 			PrintCmd("Exist invalid joint value");
 			return;
 		}
@@ -1271,7 +1288,7 @@ void MoveStepCmd(int src, int dst)
 	{
 		for(int i=src; i<dst; i++)
 		{
-			Page.step[i] = Page.step[i + 1];		
+			Page.step[i] = Page.step[i + 1];
 			DrawStep(i);
 		}
 	}
@@ -1279,7 +1296,7 @@ void MoveStepCmd(int src, int dst)
 	{
 		for(int i=src; i>dst; i--)
 		{
-			Page.step[i] = Page.step[i - 1];		
+			Page.step[i] = Page.step[i - 1];
 			DrawStep(i);
 		}
 	}
@@ -1310,7 +1327,7 @@ void NewCmd()
 	bEdited = true;
 }
 
-void GoCmd(CM730 *cm730, int index)
+void GoCmd(dynamixel::PacketHandler *packetHandler, int index)
 {
 	if(index < 0 || index >= Action::MAXNUM_STEP)
 	{
@@ -1330,31 +1347,33 @@ void GoCmd(CM730 *cm730, int index)
 
 	int id;
 	int n = 0;
-	int param[JointData::NUMBER_OF_JOINTS * 5];
-	int wGoalPosition, wStartPosition, wDistance;
+	uint8_t param[JointData::NUMBER_OF_JOINTS * (1 + MX28::PARAM_BYTES)];
+	uint32_t wGoalPosition, wStartPosition, wDistance;
 
 	for(id=JointData::ID_R_SHOULDER_PITCH; id<JointData::NUMBER_OF_JOINTS; id++)
 	{
 		if(id==19 || id==20 || id==21 || id==22)
 			continue;
-		
-		if(Page.step[index].position[id] + MotionManager::GetInstance()->m_Offset[id] & Action::INVALID_BIT_MASK)
-		{			
-			printf("conta id %d =%d", id, Page.step[index].position[id] + MotionManager::GetInstance()->m_Offset[id]);
+
+		if((Page.step[index].position[id] + MotionManager::GetInstance()->m_Offset[id]) & Action::INVALID_BIT_MASK)
+		{
+			printf("conta id %d =%d", id, (Page.step[index].position[id] + MotionManager::GetInstance()->m_Offset[id]));
 			_getch();
 			PrintCmd("Exist invalid joint value");
 			return;
 		}
 
-		if(cm730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &wStartPosition, 0) != CM730::SUCCESS)
+		// if(cm730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &wStartPosition, 0) != CM730::SUCCESS)
+		if(packetHandler->read4ByteTxRx(portHandler, id, MX28::P_PRESENT_POSITION, &wStartPosition, &dxl_error) != COMM_SUCCESS)
 		{
-			printf("lendo id %d =%d", id, cm730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &wStartPosition, 0));
+			// printf("lendo id %d =%d", id, cm730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &wStartPosition, 0));
+			printf("lendo id %d =%d", id, packetHandler->read4ByteTxRx(portHandler, id, MX28::P_PRESENT_POSITION, &wStartPosition, &dxl_error));
 			_getch();
 			PrintCmd("Failed to read position");
 			return;
 		}
 
-		wGoalPosition = Page.step[index].position[id] + MotionManager::GetInstance()->m_Offset[id];
+		wGoalPosition = (Page.step[index].position[id] + MotionManager::GetInstance()->m_Offset[id]);
 		if( wStartPosition > wGoalPosition )
 			wDistance = wStartPosition - wGoalPosition;
 		else
@@ -1365,13 +1384,18 @@ void GoCmd(CM730 *cm730, int index)
 			wDistance = 8;
 
 		param[n++] = id;
-		param[n++] = CM730::GetLowByte(wGoalPosition);
-		param[n++] = CM730::GetHighByte(wGoalPosition);
-		param[n++] = CM730::GetLowByte(wDistance);
-		param[n++] = CM730::GetHighByte(wDistance);
+		// param[n++] = CM730::GetLowByte(wGoalPosition);
+		// param[n++] = CM730::GetHighByte(wGoalPosition);
+		// param[n++] = CM730::GetLowByte(wDistance);
+		// param[n++] = CM730::GetHighByte(wDistance);
+		param[n++] = (DXL_LOBYTE(DXL_LOWORD(wGoalPosition)));
+    param[n++] = (DXL_HIBYTE(DXL_LOWORD(wGoalPosition)));
+    param[n++] = (DXL_LOBYTE(DXL_HIWORD(wDistance)));
+    param[n++] = (DXL_HIBYTE(DXL_HIWORD(wDistance)));
 	}
 
-	cm730->SyncWrite(MX28::P_GOAL_POSITION_L, 5, JointData::NUMBER_OF_JOINTS - 1, param);
+	// cm730->SyncWrite(MX28::P_GOAL_POSITION_L, 5, JointData::NUMBER_OF_JOINTS - 1, param);
+	packetHandler->syncWriteTxOnly(portHandler, MX28::P_GOAL_POSITION, MX28::PARAM_BYTES, param, (JointData::NUMBER_OF_JOINTS * (1 + MX28::PARAM_BYTES)));
 
 	Step = Page.step[index];
 	DrawStep(7);
@@ -1398,12 +1422,13 @@ void SaveCmd()
 		bEdited = false;
 }
 
-void readServo(CM730 *cm730)
+void readServo(dynamixel::PacketHandler *packetHandler)
 {
-	int value;
+	uint32_t value;
 	for(int id=JointData::ID_MIN; id<JointData::ID_MAX; id++)
 	{
-			if(cm730->ReadWord(id, MX28::P_GOAL_POSITION_L, &value, 0) == CM730::SUCCESS)
+			// if(cm730->ReadWord(id, MX28::P_GOAL_POSITION_L, &value, 0) == CM730::SUCCESS)
+			if(packetHandler->read4ByteTxRx(portHandler, id, MX28::P_GOAL_POSITION, &value, &dxl_error) == COMM_SUCCESS)
 				Step.position[id] = value - MotionManager::GetInstance()->m_Offset[id];
 	}
 	DrawStep(7);

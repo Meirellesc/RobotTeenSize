@@ -423,7 +423,7 @@ void MotionManager::Process()
 	if(joint_num > 0)
 
 
-    //m_CM730->syncWriteTxOnly(portHandler, MX28::P_GOAL_POSITION, MX28::PARAM_BYTES, param, (joint_num  * (1 + MX28::PARAM_BYTES)));
+    //m_CM730->SyncWrite(MX28::P_CW_COMPLIANCE_SLOPE, MX28::PARAM_BYTES, joint_num, param);
     m_CM730->syncWriteTxOnly(portHandler, MX28::P_GOAL_POSITION, MX28::PARAM_BYTES, param, (joint_num  * (1 + MX28::PARAM_BYTES)));
 /*
     std::cout << "goal 7: " << int (wGoalPosition) << '\n';

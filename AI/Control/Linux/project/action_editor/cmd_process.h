@@ -3,6 +3,8 @@
 
 
 #include "LinuxDARwIn.h"
+#include "../Framework_Dynamixel/include/dynamixel_sdk/dynamixel_sdk.h"
+ #include <vector>
 
 
 #define PROGRAM_VERSION		"v1.00"
@@ -65,6 +67,9 @@
 
 int _getch();
 bool AskSave();
+uint8_t dxl_error;
+dynamixel::PortHandler *portHandler;
+dynamixel::PacketHandler *packetHandler;
 
 
 // Move cursor
@@ -75,7 +80,8 @@ void MoveLeftCursor();
 void MoveRightCursor();
 
 // Disp & Drawing
-void DrawIntro(Robot::CM730 *cm730);
+// void DrawIntro(Robot::CM730 *cm730);
+void DrawIntro(dynamixel::PacketHandler *packetHandler);
 void DrawEnding();
 void DrawPage();
 void DrawStep(int index);
@@ -85,10 +91,13 @@ void ClearCmd();
 void PrintCmd(const char *message);
 
 // Edit value
-void UpDownValue(Robot::CM730 *cm730, int offset);
-void SetValue(Robot::CM730 *cm730, int value);
+// void UpDownValue(Robot::CM730 *cm730, int offset);
+void UpDownValue(dynamixel::PacketHandler *packetHandler, int offset);
+// void SetValue(Robot::CM730 *cm730, int value);
+void SetValue(dynamixel::PacketHandler *packetHandler, int value);
 int GetValue();
-void ToggleTorque(Robot::CM730 *cm730);
+// void ToggleTorque(Robot::CM730 *cm730);
+void ToggleTorque(dynamixel::PacketHandler *packetHandler);
 
 // Command process
 void BeginCommandMode();
@@ -99,20 +108,24 @@ void PrevCmd();
 void PageCmd(int index);
 void TimeCmd();
 void SpeedCmd();
-void PlayCmd(Robot::CM730 *cm730);
+// void PlayCmd(Robot::CM730 *cm730);
+void PlayCmd(dynamixel::PacketHandler *packetHandler);
 void ListCmd();
-void OnOffCmd(Robot::CM730 *cm730, bool on, int num_param, int *list);
+// void OnOffCmd(Robot::CM730 *cm730, bool on, int num_param, int *list);
+void OnOffCmd(dynamixel::PacketHandler *packetHandler, bool on, int num_param, int *list);
 void WriteStepCmd(int index);
 void DeleteStepCmd(int index);
 void InsertStepCmd(int index);
 void MoveStepCmd(int src, int dst);
 void CopyCmd(int index);
 void NewCmd();
-void GoCmd(Robot::CM730 *cm730, int index);
+// void GoCmd(Robot::CM730 *cm730, int index);
+void GoCmd(dynamixel::PacketHandler *packetHandler, int index);
 void SaveCmd();
 void NameCmd();
 void goInitPage(); //Criando novas funcoes
 void backToPage(); //Criando novas funcoes
-void readServo(Robot::CM730 *cm730);
+// void readServo(Robot::CM730 *cm730);
+void readServo(dynamixel::PacketHandler *packetHandler);
 
 #endif
