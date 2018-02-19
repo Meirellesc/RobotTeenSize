@@ -94,7 +94,7 @@ void PrintCmd(const char *message);
 // void UpDownValue(Robot::CM730 *cm730, int offset);
 void UpDownValue(dynamixel::PacketHandler *packetHandler, int offset);
 // void SetValue(Robot::CM730 *cm730, int value);
-void SetValue(dynamixel::PacketHandler *packetHandler, int value);
+void SetValue(dynamixel::PacketHandler *packetHandler, uint32_t value);
 int GetValue();
 // void ToggleTorque(Robot::CM730 *cm730);
 void ToggleTorque(dynamixel::PacketHandler *packetHandler);

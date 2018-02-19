@@ -27,6 +27,7 @@ Arquivo fonte contendo o programa que grava pontos de ações do robô
 #include "blackboard.h"
 #include <stdlib.h>     /* system, NULL, EXIT_FAILURE */
 
+
 #ifdef MX28_1024
 #define MOTION_FILE_PATH    "../../../Data/motion_1024.bin"
 #else
@@ -34,6 +35,17 @@ Arquivo fonte contendo o programa que grava pontos de ações do robô
 #endif
 
 #define INI_FILE_PATH       "../../../Data/config.ini"
+
+//------------- SDK ADD -----------------------------------
+// Control table address -> MX28.h
+
+// Protocol version
+#define PROTOCOL_VERSION                2.0                // See which protocol version is used in the Dynamixel
+
+// Default setting
+#define BAUDRATE                        1000000
+#define DEVICENAME                      "/dev/ttyUSB0"      // Check which port is being used on your controller
+//------------- SDK ADD -----------------------------------
 
 using namespace Robot;
 
@@ -62,43 +74,68 @@ void sighandler(int sig)
 // ---- Open USBDynamixel -----------------------------------------------{
 // int Initialize_servo(char *string1)
 int Initialize_servo(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
+
 {
-    bool servoConectado = false;
-    int idServo;
-    sprintf(string1,"/dev/robot/body");
-    // LinuxCM730* linux_cm730;
-    // linux_cm730 = new LinuxCM730(string1);
-    // CM730* cm730;
-    // cm730 = new CM730(linux_cm730);
+  bool servoConectado = false;
+  int idServo;
+  char string1[50];
+  sprintf(string1,"/dev/robot/body");
+/*
+  LinuxCM730* linux_cm730;
+  linux_cm730 = new LinuxCM730(string1);
+  CM730* cm730;
+  cm730 = new CM730(linux_cm730);
+*/
 
-    std::vector<uint8_t> vec;
-    int dxl_comm_result = COMM_TX_FAIL;
+  std::vector<uint8_t> vec;
+  int dxl_comm_result = COMM_TX_FAIL;
 
-    // if( MotionManager::GetInstance()->Initialize(cm730) == 0)
-    if(MotionManager::GetInstance()->Initialize(packetHandler, portHandler) == 0)
-    { // not connect with board rs485
-        std::cout<<"\e[1;31mNão há nenhuma placa USB/RS-485 conectada no computador.\n\n\e[0m"<<std::endl;
-		      return -1;
+  //OPEN PORT
+  if (portHandler->openPort())
+  {
+    printf("Succeeded to open the port!\n");
+  }
+  else
+  {
+    printf("Failed to open the port!\n");
+    return 1;
+  }
+
+  // Set port baudrate
+  if (portHandler->setBaudRate(BAUDRATE))
+  {
+    printf("Succeeded to change the baudrate!\n");
+  }
+  else
+  {
+    printf("Failed to change the baudrate!\n");
+    return 1;
+  }
+
+  if( MotionManager::GetInstance()->Initialize(packetHandler, portHandler) == 0)
+  { // not connect with board rs485
+    std::cout<<"\e[1;31mNão há nenhuma placa USB/RS-485 conectada no computador.\n\n\e[0m"<<std::endl;
+		return -1;
+  }
+  else
+  {
+    dxl_comm_result = packetHandler->broadcastPing(portHandler, vec);
+    if (dxl_comm_result != COMM_SUCCESS)
+    {
+      printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com nenhum servo.\e[0m\n");
+      std::cout<<"Endereço: "<<"/dev/robot/body"<<std::endl;
+      std::cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<std::endl;
+      return 1;
     }
     else
     {
-		for(int id=1; id<19; id++) //check communicating
-		{
-		    cm730->ReadByte(id, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
-		    servoConectado = idServo == id;
-		    if(servoConectado)
-		    {
-		        std:: cout<<"Connected and communicating with the body of the robot!\n";
-		        return 0;
-		    }
-			usleep(1000);
-		}
-
+      printf("Connected and communicating with the body of the robot: \n");
+      for (int i = 0; i < (int)vec.size(); i++)
+      {
+        printf("[ID:%03d]\n", vec.at(i));
+      }
     }
-    printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com nenhum servo.\e[0m\n");
-    std::cout<<"Endereço: "<<"/dev/robot/body"<<std::endl;
-    std::cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<std::endl;
-    return 1;
+  }
 }
 
 
@@ -106,7 +143,7 @@ int main(int argc, char *argv[])
 {
     int ch;
     char filename[128];
-	char string1[50]; //String
+	  char string1[50]; //String
 
     signal(SIGABRT, &sighandler);
     signal(SIGTERM, &sighandler);
@@ -152,10 +189,17 @@ int main(int argc, char *argv[])
 
     //////////////////// Framework Initialize ////////////////////////////
     // ---- Open USBDynamixel -----------------------------------------------{
-    Initialize_servo(string1); // chama a função que encontra o endereço de comunicação com o servo
-    LinuxCM730 linux_cm730(string1);
-    CM730 cm730(&linux_cm730);
-    if(MotionManager::GetInstance()->Initialize(&cm730) == false)
+    //DECLARAÇÃO SDK
+    dynamixel::PortHandler *portHandler = dynamixel::PortHandler::getPortHandler(DEVICENAME);
+    dynamixel::PacketHandler *packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
+
+    if(Initialize_servo(packetHandler, portHandler) == 1) // chama a função que encontra o endereço de comunicação com o servo
+      return 0;
+
+    // Initialize_servo(string1); // chama a função que encontra o endereço de comunicação com o servo
+    // LinuxCM730 linux_cm730(string1);
+    // CM730 cm730(&linux_cm730);
+    if(MotionManager::GetInstance()->Initialize(packetHandler, portHandler) == false)
     {
         printf("Fail to initialize Motion Manager!\n");
     }
@@ -170,7 +214,8 @@ int main(int argc, char *argv[])
 	//MotionManager::GetInstance()->StopThread();
     /////////////////////////////////////////////////////////////////////
 
-    DrawIntro(&cm730);
+    // DrawIntro(&cm730);
+    DrawIntro(packetHandler);
 
     while(1)
     {
@@ -193,15 +238,13 @@ int main(int argc, char *argv[])
             }
         }
         else if( ch == '[' )
-            UpDownValue(&cm730, -1);
-        else if( ch == ']' )
-            UpDownValue(&cm730, 1);
+            UpDownValue(packetHandler, 1);
         else if( ch == '{' )
-            UpDownValue(&cm730, -10);
+            UpDownValue(packetHandler, -10);
         else if( ch == '}' )
-            UpDownValue(&cm730, 10);
+            UpDownValue(packetHandler, 10);
         else if( ch == ' ' )
-            ToggleTorque(&cm730);
+            ToggleTorque(packetHandler);
         else if( ch >= 'A' && ch <= 'z' )
         {
             char input[128] = {0,};
@@ -289,21 +332,21 @@ int main(int argc, char *argv[])
                     }
                     else if(strcmp(cmd, "play") == 0)
                     {
-                        PlayCmd(&cm730);
+                        PlayCmd(packetHandler);
                     }
                     else if(strcmp(cmd, "set") == 0)
                     {
                         if(num_param > -900)
-                            SetValue(&cm730, iparam[0]);
+                            SetValue(packetHandler, iparam[0]);
                         else
                             PrintCmd("Need parameter");
                     }
                     else if(strcmp(cmd, "list") == 0)
                         ListCmd();
                     else if(strcmp(cmd, "on") == 0)
-                        OnOffCmd(&cm730, true, num_param, iparam);
+                        OnOffCmd(packetHandler, true, num_param, iparam);
                     else if(strcmp(cmd, "off") == 0)
-                        OnOffCmd(&cm730, false, num_param, iparam);
+                        OnOffCmd(packetHandler, false, num_param, iparam);
                     else if(strcmp(cmd, "w") == 0)
                     {
                         if(num_param > 0)
@@ -344,7 +387,7 @@ int main(int argc, char *argv[])
                     else if(strcmp(cmd, "g") == 0)
                     {
                         if(num_param > 0)
-                            GoCmd(&cm730, iparam[0]);
+                            GoCmd(packetHandler, iparam[0]);
                         else
                             PrintCmd("Need parameter");
                     }
@@ -355,11 +398,11 @@ int main(int argc, char *argv[])
                     else if(strcmp(cmd, "t") == 0)
 					{
 						goInitPage();
-						PlayCmd(&cm730);
+						PlayCmd(packetHandler);
 						backToPage();
 					}
                     else if(strcmp(cmd, "read") == 0)
-						readServo(&cm730);
+						readServo(packetHandler);
 					else
                         PrintCmd("Bad command! please input 'help'");
                 }

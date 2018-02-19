@@ -10,9 +10,12 @@
 TARGET = action_editor
 
 CXX = g++
-INCLUDE_DIRS = -I../../include -I../../../Framework/include  -I../../../../Blackboard/include
+
+INCLUDE_DIRS = -I../../include -I../../../Framework/include  -I../../../../Blackboard/include -I../../../Framework/Framework_Dynamixel/include/dynamixel_sdk
+
 CXXFLAGS +=	-O2 -DLINUX -g -Wall -fmessage-length=0 $(INCLUDE_DIRS)
-LIBS += -lpthread -lncurses -lrt
+
+LIBS += -lpthread -lncurses -lrt -ldxl_x64_cpp 
 
 DEPN = ../../../../Blackboard/src/blackboard.cpp
 
