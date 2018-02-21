@@ -40,8 +40,9 @@ int indexPageBuffer = 1;
 Action::PAGE Page;
 Action::STEP Step;
 
-extern LinuxMotionTimer linuxMotionTimer;
+uint8_t dxl_error;
 
+extern LinuxMotionTimer linuxMotionTimer;
 
 int _getch()
 {
@@ -100,16 +101,17 @@ void reset_stdin(void)
 }
 
 // void ReadStep(CM730 *cm730)
-void ReadStep(dynamixel::PacketHandler *packetHandler)
+void ReadStep(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
 {
 	uint8_t value8;
 	uint32_t value32;
 	dxl_error = 0;
+
 	for(int id=0; id<31; id++)
 	{
 		if(id >= JointData::ID_MIN && id <= JointData::ID_MAX)
 		{
-			//if(cm730->ReadByte(id, MX28::P_TORQUE_ENABLE, &value, 0) == CM730::SUCCESS)
+			// if(cm730->ReadByte(id, MX28::P_TORQUE_ENABLE, &value, 0) == CM730::SUCCESS)
 			if(packetHandler->read1ByteTxRx(portHandler, id, MX28::P_TORQUE_ENABLE, &value8, &dxl_error) == COMM_SUCCESS)
 			{
 				if(value8 == 1)
@@ -287,7 +289,7 @@ void MoveRightCursor()
 }
 
 // void DrawIntro(CM730 *cm730)
-void DrawIntro(dynamixel::PacketHandler *packetHandler)
+void DrawIntro(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
 {
 	int nrows, ncolumns;
     setupterm(NULL, fileno(stdout), (int *)0);
@@ -296,10 +298,10 @@ void DrawIntro(dynamixel::PacketHandler *packetHandler)
 
 	system("clear");
 	printf("\n");
-	std::cout<<"---------------- "<<Lazul<<"RoboFEI-HT"<<nulo<<" ---------------------";
+	std::cout<<"---------------- "<<Lazul<<"RoboFEI-HT Robot Teen"<<nulo<<" ---------------------";
 	printf("\n\n");
 	printf(" *Terminal screen size must be %d(col)x%d(row).\n", SCREEN_COL+2, SCREEN_ROW);
-    printf(" *Current terminal has %d columns and %d rows.\n", ncolumns, nrows);
+  printf(" *Current terminal has %d columns and %d rows.\n", ncolumns, nrows);
 	printf("\n");
 	printf("\n");
 	printf("Press any key to start program...\n");
@@ -309,7 +311,7 @@ void DrawIntro(dynamixel::PacketHandler *packetHandler)
 
 	Action::GetInstance()->LoadPage(indexPage, &Page);
 
-	ReadStep(packetHandler);
+	ReadStep(packetHandler, portHandler);
 	Step.pause = 0;
 	Step.time = 0;
 
@@ -573,10 +575,10 @@ void PrintCmd(const char *message)
 }
 
 // void UpDownValue(CM730 *cm730, int offset)
-void UpDownValue(dynamixel::PacketHandler *packetHandler, int offset)
+void UpDownValue(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler, int offset)
 {
 	// SetValue(cm730, GetValue() + offset);
-	SetValue(packetHandler, GetValue() + offset);
+	SetValue(packetHandler, portHandler, GetValue() + offset);
 }
 
 int GetValue()
@@ -668,7 +670,7 @@ int GetValue()
 }
 
 // void SetValue(CM730 *cm730, int value)
-void SetValue(dynamixel::PacketHandler *packetHandler, uint32_t value)
+void SetValue(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler, uint32_t value)
 {
 	int col;
 	int row;
@@ -885,7 +887,7 @@ void SetValue(dynamixel::PacketHandler *packetHandler, uint32_t value)
 	GoToCursor(col, row);
 }
 
-void ToggleTorque(dynamixel::PacketHandler *packetHandler)
+void ToggleTorque(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
 {
 	if(Col != STP7_COL || Row > ID_20_ROW)
 		return;
@@ -1018,7 +1020,7 @@ void SpeedCmd()
 	DrawPage();
 }
 
-void PlayCmd(dynamixel::PacketHandler *packetHandler)
+void PlayCmd(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
 {
 	// int value;
 
@@ -1077,7 +1079,7 @@ void PlayCmd(dynamixel::PacketHandler *packetHandler)
 
 	usleep(10000);
 
-	ReadStep(packetHandler);
+	ReadStep(packetHandler, portHandler);
 	DrawStep(7);
 }
 
@@ -1146,7 +1148,7 @@ void ListCmd()
 }
 
 // void OnOffCmd(CM730 *cm730, bool on, int num_param, int *list)
-void OnOffCmd(dynamixel::PacketHandler *packetHandler, bool on, int num_param, int *list)
+void OnOffCmd(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler, bool on, int num_param, int *list)
 {
 	if(num_param == 0)
 	{
@@ -1164,7 +1166,7 @@ void OnOffCmd(dynamixel::PacketHandler *packetHandler, bool on, int num_param, i
 		}
 	}
 
-	ReadStep(packetHandler);
+	ReadStep(packetHandler, portHandler);
 	DrawStep(7);
 }
 
@@ -1327,7 +1329,7 @@ void NewCmd()
 	bEdited = true;
 }
 
-void GoCmd(dynamixel::PacketHandler *packetHandler, int index)
+void GoCmd(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler, int index)
 {
 	if(index < 0 || index >= Action::MAXNUM_STEP)
 	{
@@ -1422,7 +1424,7 @@ void SaveCmd()
 		bEdited = false;
 }
 
-void readServo(dynamixel::PacketHandler *packetHandler)
+void readServo(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
 {
 	uint32_t value;
 	for(int id=JointData::ID_MIN; id<JointData::ID_MAX; id++)

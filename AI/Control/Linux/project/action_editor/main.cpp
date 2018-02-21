@@ -28,11 +28,9 @@ Arquivo fonte contendo o programa que grava pontos de ações do robô
 #include <stdlib.h>     /* system, NULL, EXIT_FAILURE */
 
 
-#ifdef MX28_1024
-#define MOTION_FILE_PATH    "../../../Data/motion_1024.bin"
-#else
+
 #define MOTION_FILE_PATH    "../../../Data/motion_4096.bin"
-#endif
+
 
 #define INI_FILE_PATH       "../../../Data/config.ini"
 
@@ -193,8 +191,7 @@ int main(int argc, char *argv[])
     dynamixel::PortHandler *portHandler = dynamixel::PortHandler::getPortHandler(DEVICENAME);
     dynamixel::PacketHandler *packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
 
-    if(Initialize_servo(packetHandler, portHandler) == 1) // chama a função que encontra o endereço de comunicação com o servo
-      return 0;
+    Initialize_servo(packetHandler, portHandler); // chama a função que encontra o endereço de comunicação com o servo
 
     // Initialize_servo(string1); // chama a função que encontra o endereço de comunicação com o servo
     // LinuxCM730 linux_cm730(string1);
@@ -210,12 +207,13 @@ int main(int argc, char *argv[])
 
     MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());
     linuxMotionTimer.Initialize(MotionManager::GetInstance());
-	linuxMotionTimer.Stop();
+	  linuxMotionTimer.Stop();
 	//MotionManager::GetInstance()->StopThread();
     /////////////////////////////////////////////////////////////////////
 
     // DrawIntro(&cm730);
-    DrawIntro(packetHandler);
+    DrawIntro(packetHandler, portHandler);
+    // printf("cade3");
 
     while(1)
     {
@@ -238,13 +236,13 @@ int main(int argc, char *argv[])
             }
         }
         else if( ch == '[' )
-            UpDownValue(packetHandler, 1);
+            UpDownValue(packetHandler, portHandler, 1);
         else if( ch == '{' )
-            UpDownValue(packetHandler, -10);
+            UpDownValue(packetHandler, portHandler, -10);
         else if( ch == '}' )
-            UpDownValue(packetHandler, 10);
+            UpDownValue(packetHandler, portHandler, 10);
         else if( ch == ' ' )
-            ToggleTorque(packetHandler);
+            ToggleTorque(packetHandler, portHandler);
         else if( ch >= 'A' && ch <= 'z' )
         {
             char input[128] = {0,};
@@ -332,21 +330,21 @@ int main(int argc, char *argv[])
                     }
                     else if(strcmp(cmd, "play") == 0)
                     {
-                        PlayCmd(packetHandler);
+                        PlayCmd(packetHandler, portHandler);
                     }
                     else if(strcmp(cmd, "set") == 0)
                     {
                         if(num_param > -900)
-                            SetValue(packetHandler, iparam[0]);
+                            SetValue(packetHandler, portHandler, iparam[0]);
                         else
                             PrintCmd("Need parameter");
                     }
                     else if(strcmp(cmd, "list") == 0)
                         ListCmd();
                     else if(strcmp(cmd, "on") == 0)
-                        OnOffCmd(packetHandler, true, num_param, iparam);
+                        OnOffCmd(packetHandler, portHandler, true, num_param, iparam);
                     else if(strcmp(cmd, "off") == 0)
-                        OnOffCmd(packetHandler, false, num_param, iparam);
+                        OnOffCmd(packetHandler, portHandler, false, num_param, iparam);
                     else if(strcmp(cmd, "w") == 0)
                     {
                         if(num_param > 0)
@@ -387,7 +385,7 @@ int main(int argc, char *argv[])
                     else if(strcmp(cmd, "g") == 0)
                     {
                         if(num_param > 0)
-                            GoCmd(packetHandler, iparam[0]);
+                            GoCmd(packetHandler, portHandler, iparam[0]);
                         else
                             PrintCmd("Need parameter");
                     }
@@ -398,11 +396,11 @@ int main(int argc, char *argv[])
                     else if(strcmp(cmd, "t") == 0)
 					{
 						goInitPage();
-						PlayCmd(packetHandler);
+						PlayCmd(packetHandler, portHandler);
 						backToPage();
 					}
                     else if(strcmp(cmd, "read") == 0)
-						readServo(packetHandler);
+						readServo(packetHandler, portHandler);
 					else
                         PrintCmd("Bad command! please input 'help'");
                 }
