@@ -3,6 +3,9 @@
 
 import serial
 
+import dynamixel_functions as dynamixel #ADD LIBRARY DYNAMIXEL_FUNCTIONS
+import ctypes
+
 from PyQt4.QtCore import QThread, QMutex, pyqtSignal as Signal
 
 from SerialProtocol import SerialProtocol
@@ -16,6 +19,23 @@ class SerialThread(QThread, SerialProtocol):
     packetReceived = Signal(object)
     minServoId = 0
     maxServoId = 25
+    #-----------------------------SDK ADD-----------------------------#
+    # Protocol version
+    PROTOCOL_VERSION            = 2                             # See which protocol version is used in the Dynamixel
+    # Default setting
+    BAUDRATE                    = 1000000
+    DEVICENAME                  = "/dev/ttyUSB0"                # Check which port is being used on your controller
+
+    MAX_ID                      = 252
+    COMM_SUCCESS                = 0                             # Communication Success result value
+    COMM_TX_FAIL                = -1001                         # Communication Tx Failed
+
+    # Get methods and members of PortHandlerLinux
+    port_num = dynamixel.portHandler(DEVICENAME)
+
+    # Initialize PacketHandler Structs
+    dynamixel.packetHandler()
+    #-----------------------------SDK ADD-----------------------------#
 
     def __init__(self, parent):
         QThread.__init__(self)
@@ -39,15 +59,25 @@ class SerialThread(QThread, SerialProtocol):
 
     def openSerialPort(self, serialPortNameOrNumber, serialBaudrate):
         try:
-            self.serialPort.port = str(serialPortNameOrNumber)
-            self.serialPort.baudrate = serialBaudrate
-            self.serialPort.timeout = self.serialTimeout
-            self.serialPort.open()
+            dynamixel.openPort(self.port_num)
+            dynamixel.setBaudRate(self.port_num, self.BAUDRATE)
         except serial.serialutil.SerialException, e:
             self.log(0, 'Error opening %s (Maybe it is already in use):\n%s' % (self.serialPort.name, e))
             self.serialConnectionError.emit()
         else:
-            self.log(1, 'Connected to serial port %s with %d baud' % (self.serialPort.portstr, self.serialPort.baudrate))
+            self.log(1, 'Connected to serial port %s with %d baud' % ((self.DEVICENAME), self.BAUDRATE))
+
+
+        # try:
+        #     self.serialPort.port = str(serialPortNameOrNumber)
+        #     self.serialPort.baudrate = serialBaudrate
+        #     self.serialPort.timeout = self.serialTimeout
+        #     self.serialPort.open()
+        # except serial.serialutil.SerialException, e:
+        #     self.log(0, 'Error opening %s (Maybe it is already in use):\n%s' % (self.serialPort.name, e))
+        #     self.serialConnectionError.emit()
+        # else:
+        #     self.log(1, 'Connected to serial port %s with %d baud' % (self.serialPort.portstr, self.serialPort.baudrate))
 
 
     def closeSerialPort(self):
@@ -67,9 +97,20 @@ class SerialThread(QThread, SerialProtocol):
 
 
     def pingServos(self, servoIdList):
-        servoIdList = list(servoIdList)
-        for servoId in servoIdList:
-            self.sendPacket(servoId, 'PING', [])
+        dxl_model_number = dynamixel.pingGetModelNum(self.port_num, self.PROTOCOL_VERSION, servoIdList)
+        dxl_comm_result = dynamixel.getLastTxRxResult(self.port_num, self.PROTOCOL_VERSION)
+        dxl_error = dynamixel.getLastRxPacketError(self.port_num, self.PROTOCOL_VERSION)
+
+        if dxl_comm_result != COMM_SUCCESS:
+            self.log(2, "Verifique se a chave que liga os servos motores esta na posicao ligada.")
+        elif dxl_error != 0:
+            self.log(2, "Verifique se a chave que liga os servos motores esta na posicao ligada.")
+        else:
+            print("[ID:%03d] ping Succeeded. Dynamixel model number : %d" % (servoIdList, dxl_model_number))
+
+        # servoIdList = list(servoIdList)
+        # for servoId in servoIdList:
+        #     self.sendPacket(servoId, 'PING', [])
 
 
     def readAllServoData(self, servoIdList):

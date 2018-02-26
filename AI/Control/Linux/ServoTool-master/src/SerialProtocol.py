@@ -1,6 +1,34 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
+
 from common.DataConverter import DataConverter
+
+#-----------------------------SDK ADD-----------------------------#
+import dynamixel_functions as dynamixel
+
+import ctypes
+
+# Protocol version
+PROTOCOL_VERSION            = 2                             # See which protocol version is used in the Dynamixel
+
+# Default setting
+DXL_ID                      = 8                             # Dynamixel ID: 1
+BAUDRATE                    = 1000000
+DEVICENAME                  = "/dev/ttyUSB0"                # Check which port is being used on your controller
+
+MAX_ID                      = 252
+COMM_SUCCESS                = 0                             # Communication Success result value
+COMM_TX_FAIL                = -1001                         # Communication Tx Failed
+
+
+# Get methods and members of PortHandlerLinux or PortHandlerWindows
+port_num = dynamixel.portHandler(DEVICENAME)
+
+# Initialize PacketHandler Structs
+dynamixel.packetHandler()
+
+dxl_comm_result = COMM_TX_FAIL                              # Communication result
+#-----------------------------SDK ADD-----------------------------#
 
 class SerialProtocol:
     logLevel = 10
@@ -35,23 +63,20 @@ class SerialProtocol:
 
     def scanForServos(self):
         self.log(2, 'Start scanning for servos...')
-        self.sendPacket(self.broadcastId, 'PING', [])
-        servoIdList = []
-        failureCount = 0
-        lastServoId = -1
 
-        while (failureCount * (self.serialTimeout / 0.0012)) < (253 - lastServoId):
+        dxl_comm_result = dynamixel.getLastTxRxResult(port_num, PROTOCOL_VERSION)
+        dxl_error = dynamixel.getLastRxPacketError(port_num, PROTOCOL_VERSION)
+        dynamixel.broadcastPing(self.port_num, PROTOCOL_VERSION)
 
-            packetServoId, _, _, _, _ = self.parsePacket(self.receivePacket())
-
-            if packetServoId != None:
-                servoIdList.append(packetServoId)
-                failureCount = 0
-                lastServoId = packetServoId
-            else:
-                failureCount += 1
-
-        return servoIdList
+        if dxl_comm_result != COMM_SUCCESS:
+            self.log(2, "Verifique se a chave que liga os servos motores esta na posicao ligada.")
+        elif dxl_error != 0:
+            self.log(2, "Verifique se a chave que liga os servos motores está na posição ligada.")
+        else:
+            self.log(2, "Detected Dynamixel : ")
+            for id in range(0, MAX_ID):
+                if ctypes.c_ubyte(dynamixel.getBroadcastPingResult(port_num, PROTOCOL_VERSION, id)).value:
+                    self.log(2, "[ID:%03d]" % (id))
 
     def parsePacket(self, packetBytes):
         if len(packetBytes) < 6:
@@ -168,7 +193,7 @@ instructionSets = {
         (0x03, 'WRITE', 'memory address, N values | assigned values have little endian format (broadcast: yes)'),
         (0x04, 'REG_WRITE', 'memory address, N values | assigned values have little endian format (broadcast: yes)'),
         (0x05, 'ACTION', 'commit reg_write values to memory (broadcast: yes)'),
-        (0x06, 'RESET', 'reset all servo settings including the servo id (broadcast: yes)'),
+        (0x06, 'FACTORY_RESET', 'reset all servo settings including the servo id (broadcast: yes)'),
         (0x08, 'REBOOT', 'Instruction to reboot the Device (broadcast: yes)'),
         (0x55, 'STATUS', 'Return Instruction for the Instruction Packet (broadcast: yes)'),
         (0x82, 'SYNC_READ', 'For multiple devices, Instruction to read data from the same Address with the same length at once (broadcast: yes)'),
@@ -207,26 +232,41 @@ instructionSets['Default'] = instructionSets['RobotisServo']
 memoryFields = {}
 memoryFields['Common'] = [
     {'name': 'ModelNumber', 'type': 'signed short', 'writable': True},
-    {'name': 'VersionofFirmware', 'type': 'unsigned char', 'writable': True},
+    {'name': 'ModelInformation', 'type': 'signed short', 'writable': True},
+    {'name': 'VersionofFirmware', 'type': 'signed char', 'writable': True},
     {'name': 'servoId', 'type': 'unsigned char', 'writable': True},
     {'name': 'BaudRateDivisor', 'type': 'unsigned char', 'writable': True},
     {'name': 'ReturnDelayTime', 'type': 'unsigned char', 'writable': True},
 ]
 
 memoryFields['RobotisServo'] = memoryFields['Common'] + [
-    {'name': 'CWAngleLimit', 'type': 'signed short', 'writable': True},
-    {'name': 'CCWAngleLimit', 'type': 'signed short', 'writable': True},
+    # {'name': 'CWAngleLimit', 'type': 'signed short', 'writable': True},
+    # {'name': 'CCWAngleLimit', 'type': 'signed short', 'writable': True},
     {'name': 'DriveMode', 'type': 'unsigned char', 'writable': True},
+    {'name': 'OperatingMode', 'type': 'unsigned char', 'writable': True},
+    {'name': 'SecondaryID', 'type': 'unsigned char', 'writable': True},
+    {'name': 'ProtocolVersion', 'type': 'unsigned char', 'writable': True},
+    {'name': 'HomingOffset', 'type': 'unsigned char', 'writable': True},
+    {'name': 'MovingThreshold', 'type': 'unsigned char', 'writable': True},
 #    {'name': 'Reserved1', 'type': 'unsigned char'},
-    {'name': 'HighestLimitTemperature', 'type': 'unsigned char', 'writable': True},
-    {'name': 'LowestLimitVoltage', 'type': 'unsigned char', 'writable': True},
-    {'name': 'HighestLimitVoltage', 'type': 'unsigned char', 'writable': True},
-    {'name': 'MaxTorque', 'type': 'signed short', 'writable': True},
-    {'name': 'StatusReturnLevel', 'type': 'unsigned char', 'writable': True},
-    {'name': 'AlarmLED', 'type': 'unsigned char', 'writable': True},
-    {'name': 'AlarmShutdown', 'type': 'unsigned char', 'writable': True},
-    {'name': 'MultiTurnOffset', 'type': 'signed short', 'writable': True},
-    {'name': 'ResolutionDivider', 'type': 'unsigned char', 'writable': True},
+    # {'name': 'HighestLimitTemperature', 'type': 'unsigned char', 'writable': True},
+    {'name': 'TemperatureLimit', 'type': 'unsigned char', 'writable': True},
+    # {'name': 'LowestLimitVoltage', 'type': 'unsigned char', 'writable': True},
+    # {'name': 'HighestLimitVoltage', 'type': 'unsigned char', 'writable': True},
+    {'name': 'MaxVoltageLimit', 'type': 'unsigned char', 'writable': True},
+    {'name': 'MinVoltageLimit', 'type': 'unsigned char', 'writable': True},
+    {'name': 'PWMLimit', 'type': 'unsigned char', 'writable': True},
+    {'name': 'CurrentLimit', 'type': 'unsigned char', 'writable': True},
+    {'name': 'AccelerationLimit', 'type': 'unsigned char', 'writable': True},
+    {'name': 'VelocityLimit', 'type': 'unsigned char', 'writable': True},
+    {'name': 'MaxPositionLimit', 'type': 'unsigned char', 'writable': True},
+    {'name': 'MinPositionLimit', 'type': 'unsigned char', 'writable': True},
+    # {'name': 'MaxTorque', 'type': 'signed short', 'writable': True},
+    # {'name': 'AlarmLED', 'type': 'unsigned char', 'writable': True},
+    # {'name': 'AlarmShutdown', 'type': 'unsigned char', 'writable': True},
+    {'name': 'Shutdown', 'type': 'unsigned char', 'writable': True},
+    # {'name': 'MultiTurnOffset', 'type': 'signed short', 'writable': True},
+    # {'name': 'ResolutionDivider', 'type': 'unsigned char', 'writable': True},
 #    {'name': 'Reserved2', 'type': 'unsigned char'},
 #    {'name': 'DownCalibration', 'type': 'signed short'},
 #    {'name': 'UpCalibration', 'type': 'signed short'},
@@ -236,26 +276,61 @@ memoryFields['RobotisServo'] = memoryFields['Common'] + [
 #    {'name': 'CCWComplianceMargin', 'type': 'unsigned char', 'writable': True},
 #    {'name': 'CWComplianceSlope', 'type': 'unsigned char', 'writable': True},
 #    {'name': 'CCWComplianceSlope', 'type': 'unsigned char', 'writable': True},
-    {'name': 'DGain', 'type': 'unsigned char', 'writable': True},
-    {'name': 'IGain', 'type': 'unsigned char', 'writable': True},
-    {'name': 'PGain', 'type': 'unsigned char', 'writable': True},
+    {'name': 'StatusReturnLevel', 'type': 'unsigned char', 'writable': True},
+
+    #DEVE VERIFICAR SE ESSES DOIS SÃO 'WRITABLE'!!!
+    {'name': 'RegisteredInstruction', 'type': 'signed char', 'writable': True},
+    {'name': 'HardwareErrorStatus', 'type': 'signed char', 'writable': True},
+    #DEVE VERIFICAR SE ESSES DOIS SÃO 'WRITABLE'!!!
+
+    # {'name': 'DGain', 'type': 'unsigned char', 'writable': True},
+    # {'name': 'IGain', 'type': 'unsigned char', 'writable': True},
+    # {'name': 'PGain', 'type': 'unsigned char', 'writable': True},
+    {'name': 'VelocityIGain', 'type': 'unsigned char', 'writable': True},
+    {'name': 'VelocityPGain', 'type': 'unsigned char', 'writable': True},
+    {'name': 'PositionDGain', 'type': 'unsigned char', 'writable': True},
+    {'name': 'PositionIGain', 'type': 'unsigned char', 'writable': True},
+    {'name': 'PositionPGain', 'type': 'unsigned char', 'writable': True},
+    {'name': 'Feedforward2ndGain', 'type': 'unsigned char', 'writable': True},
+    {'name': 'Feedforward1stGain', 'type': 'unsigned char', 'writable': True},
+    {'name': 'Bus Watchdog', 'type': 'unsigned char', 'writable': True},
+    {'name': 'GoalPWM', 'type': 'signed short', 'writable': True},
+    {'name': 'GoalCurrent', 'type': 'signed short', 'writable': True},
+    {'name': 'GoalVelocity', 'type': 'signed short', 'writable': True},
+    {'name': 'ProfileAcceleration', 'type': 'signed short', 'writable': True},
+    {'name': 'ProfileVelocity', 'type': 'signed short', 'writable': True},
     {'name': 'GoalPosition', 'type': 'signed short', 'writable': True},
-    {'name': 'MovingSpeed', 'type': 'signed short', 'writable': True},
-    {'name': 'TorqueLimit', 'type': 'signed short', 'writable': True},
+
+    #DEVE VERIFICAR SE ESSES TRÊS SÃO 'WRITABLE'!!!
+    {'name': 'RealtimeTick', 'type': 'signed short', 'writable': True},
+    {'name': 'Moving', 'type': 'signed short', 'writable': True},
+    {'name': 'MovingStatus', 'type': 'signed short', 'writable': True},
+    #DEVE VERIFICAR SE ESSES TRÊS SÃO 'WRITABLE'!!!
+
+    {'name': 'PresentPWM', 'type': 'signed short'},
+    {'name': 'PresentCurrent', 'type': 'signed short'},
+    {'name': 'PresentVelocity', 'type': 'signed short'},
+    # {'name': 'TorqueLimit', 'type': 'signed short', 'writable': True},
     {'name': 'PresentPosition', 'type': 'signed short'},
-    {'name': 'PresentSpeed', 'type': 'signed short'},
-    {'name': 'PresentLoad', 'type': 'signed short'},
-    {'name': 'PresentVoltage', 'type': 'unsigned char'},
-    {'name': 'PresentTemperature', 'type': 'unsigned char'},
-    {'name': 'Registered', 'type': 'unsigned char'},
-    {'name': 'Reserved3', 'type': 'unsigned char'},
-    {'name': 'Moving', 'type': 'unsigned char'},
-    {'name': 'Lock', 'type': 'unsigned char', 'writable': True},
-    {'name': 'Punch', 'type': 'signed short', 'writable': True},
-    {'name': 'Current', 'type': 'signed short', 'writable': True},
-    {'name': 'TorqueControlModeEnable', 'type': 'unsigned char', 'writable': True},
-    {'name': 'GoalTorque', 'type': 'signed short', 'writable': True},
-    {'name': 'GoalAcceleration', 'type': 'unsigned char', 'writable': True},
+    {'name': 'VelocityTrajectory', 'type': 'signed short'},
+    {'name': 'PositionTrajectory', 'type': 'signed short'},
+    {'name': 'PresentInputVoltage', 'type': 'signed short'},
+    {'name': 'PresentTemperature', 'type': 'signed short'},
+
+
+    # {'name': 'PresentSpeed', 'type': 'signed short'},
+    # {'name': 'PresentLoad', 'type': 'signed short'},
+    # {'name': 'PresentVoltage', 'type': 'unsigned char'},
+    # {'name': 'PresentTemperature', 'type': 'unsigned char'},
+    # {'name': 'Registered', 'type': 'unsigned char'},
+    # {'name': 'Reserved3', 'type': 'unsigned char'},
+    # {'name': 'Moving', 'type': 'unsigned char'},
+    # {'name': 'Lock', 'type': 'unsigned char', 'writable': True},
+    # {'name': 'Punch', 'type': 'signed short', 'writable': True},
+    # {'name': 'Current', 'type': 'signed short', 'writable': True},
+    # {'name': 'TorqueControlModeEnable', 'type': 'unsigned char', 'writable': True},
+    # {'name': 'GoalTorque', 'type': 'signed short', 'writable': True},
+    # {'name': 'GoalAcceleration', 'type': 'unsigned char', 'writable': True},
 ]
 
 memoryFields['AVRServo'] = memoryFields['RobotisServo'] + [
