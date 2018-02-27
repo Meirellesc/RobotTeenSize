@@ -4,7 +4,6 @@
 import serial
 
 import dynamixel_functions as dynamixel #ADD LIBRARY DYNAMIXEL_FUNCTIONS
-import ctypes
 
 from PyQt4.QtCore import QThread, QMutex, pyqtSignal as Signal
 
@@ -97,16 +96,19 @@ class SerialThread(QThread, SerialProtocol):
 
 
     def pingServos(self, servoIdList):
-        dxl_model_number = dynamixel.pingGetModelNum(self.port_num, self.PROTOCOL_VERSION, servoIdList)
-        dxl_comm_result = dynamixel.getLastTxRxResult(self.port_num, self.PROTOCOL_VERSION)
-        dxl_error = dynamixel.getLastRxPacketError(self.port_num, self.PROTOCOL_VERSION)
+        # servoIdList = list(servoIdList)
+        for servoId in servoIdList:
 
-        if dxl_comm_result != COMM_SUCCESS:
-            self.log(2, "Verifique se a chave que liga os servos motores esta na posicao ligada.")
-        elif dxl_error != 0:
-            self.log(2, "Verifique se a chave que liga os servos motores esta na posicao ligada.")
-        else:
-            print("[ID:%03d] ping Succeeded. Dynamixel model number : %d" % (servoIdList, dxl_model_number))
+            dxl_model_number = dynamixel.pingGetModelNum(self.port_num, self.PROTOCOL_VERSION, servoId)
+            dxl_comm_result = dynamixel.getLastTxRxResult(self.port_num, self.PROTOCOL_VERSION)
+            dxl_error = dynamixel.getLastRxPacketError(self.port_num, self.PROTOCOL_VERSION)
+
+            if dxl_comm_result != self.COMM_SUCCESS:
+                self.log(2, "Verifique se o servo " + str(servoId) + " esta ligado.")
+            elif dxl_error != 0:
+                self.log(2, "Verifique se o servo " + str(servoId) + " esta ligado.")
+            else:
+                self.log(2, "ID:{0} ping Succeeded.".format (servoId))
 
         # servoIdList = list(servoIdList)
         # for servoId in servoIdList:
@@ -114,6 +116,7 @@ class SerialThread(QThread, SerialProtocol):
 
 
     def readAllServoData(self, servoIdList):
+        self.log(2, "READ_ALL")
         self.readServoData(servoIdList, 0, self.memoryInfo['memorySize'])
 
 

@@ -61,7 +61,6 @@ DEVICENAME                  = "/dev/ttyUSB0"# Check which port is being used on 
 COMM_SUCCESS                = 0                             # Communication Success result value
 COMM_TX_FAIL                = -1001                         # Communication Tx Failed
 
-broadcastId = 0xfe
 # Initialize PortHandler Structs
 # Set the port path
 # Get methods and members of PortHandlerLinux or PortHandlerWindows

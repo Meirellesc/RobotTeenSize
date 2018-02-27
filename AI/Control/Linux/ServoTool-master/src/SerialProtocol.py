@@ -63,6 +63,7 @@ class SerialProtocol:
 
     def scanForServos(self):
         self.log(2, 'Start scanning for servos...')
+        servoIdList = []
 
         dxl_comm_result = dynamixel.getLastTxRxResult(port_num, PROTOCOL_VERSION)
         dxl_error = dynamixel.getLastRxPacketError(port_num, PROTOCOL_VERSION)
@@ -77,6 +78,28 @@ class SerialProtocol:
             for id in range(0, MAX_ID):
                 if ctypes.c_ubyte(dynamixel.getBroadcastPingResult(port_num, PROTOCOL_VERSION, id)).value:
                     self.log(2, "[ID:%03d]" % (id))
+                    servoIdList.append(id)
+        self.log(2, str(servoIdList))
+        return servoIdList
+
+        # self.log(2, 'Start scanning for servos...')
+        #         self.sendPacket(self.broadcastId, 'PING', [])
+        #         servoIdList = []
+        #         failureCount = 0
+        #         lastServoId = -1
+        #
+        #         while (failureCount * (self.serialTimeout / 0.0012)) < (253 - lastServoId):
+        #
+        #             packetServoId, _, _, _, _ = self.parsePacket(self.receivePacket())
+        #
+        #             if packetServoId != None:
+        #                 servoIdList.append(packetServoId)
+        #                 failureCount = 0
+        #                 lastServoId = packetServoId
+        #             else:
+        #                 failureCount += 1
+        #
+        #         return servoIdList
 
     def parsePacket(self, packetBytes):
         if len(packetBytes) < 6:
