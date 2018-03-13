@@ -3,7 +3,7 @@
 
 
 #include "LinuxDARwIn.h"
-#include "../Framework_Dynamixel/include/dynamixel_sdk/dynamixel_sdk.h"
+#include "dynamixel_sdk.h"
  #include <vector>
 
 

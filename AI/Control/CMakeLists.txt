@@ -36,7 +36,7 @@ add_executable(control ./Linux/project/control/main.cpp)
 add_dependencies(control libcontrol blackboard)
 
 set(LIB_DARWIN ${RoboFEI-HT_SOURCE_DIR}/Control/Linux/lib/darwin.a)
-set(LIB_DYNAMIXEL ${RoboFEI-HT_SOURCE_DIR}/Control/Framework/Framework_Dynamixel/build/linux64/libdxl_x64_cpp.so)
+set(LIB_DYNAMIXEL ${RoboFEI-HT_SOURCE_DIR}/Control/Framework/Framework_Dynamixel/libdxl_x64_cpp.so)
 
 target_link_libraries(control libcontrol blackboard ${LIB_DARWIN} ${LIB_DYNAMIXEL} -Wno-write-strings -lpthread -lrt ${Boost_LIBRARIES})
 
