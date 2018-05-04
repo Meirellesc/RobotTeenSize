@@ -59,7 +59,7 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 
 // Default setting
 #define BAUDRATE                        1000000
-#define DEVICENAME                      "/dev/ttyUSB2"      // Check which port is being used on your controller
+#define DEVICENAME                      "/dev/ttyUSB0"      // Check which port is being used on your controller
 //------------- SDK ADD -----------------------------------
 
 using namespace Robot;
