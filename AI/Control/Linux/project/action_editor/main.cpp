@@ -42,7 +42,7 @@ Arquivo fonte contendo o programa que grava pontos de ações do robô
 
 // Default setting
 #define BAUDRATE                        1000000
-#define DEVICENAME                      "/dev/ttyUSB0"      // Check which port is being used on your controller
+#define DEVICENAME                      "/dev/robot/body"      // Check which port is being used on your controller
 //------------- SDK ADD -----------------------------------
 
 using namespace Robot;
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 	  linuxMotionTimer.Stop();
 	//MotionManager::GetInstance()->StopThread();
     /////////////////////////////////////////////////////////////////////
-
+    
     // DrawIntro(&cm730);
     DrawIntro(packetHandler, portHandler);
     // printf("cade3");
