@@ -60,10 +60,10 @@ Walking::Walking()
 
 	m_Joint.SetAngle(JointData::ID_R_SHOULDER_PITCH, -10.00);
 	m_Joint.SetAngle(JointData::ID_L_SHOULDER_PITCH, 10.00);
-	m_Joint.SetAngle(JointData::ID_R_SHOULDER_ROLL, -15.10);
-    m_Joint.SetAngle(JointData::ID_L_SHOULDER_ROLL, 15.10);
-	m_Joint.SetAngle(JointData::ID_R_ELBOW, 0); // positivo frente
-	m_Joint.SetAngle(JointData::ID_L_ELBOW,  0); // negativo frente
+	m_Joint.SetAngle(JointData::ID_R_SHOULDER_ROLL, -75.10); //negativo fecha
+    m_Joint.SetAngle(JointData::ID_L_SHOULDER_ROLL, 87.10); // positivo fecha
+	m_Joint.SetAngle(JointData::ID_R_ELBOW, -155); // negativo frente
+	m_Joint.SetAngle(JointData::ID_L_ELBOW,  152); // positivo frente
   BALANCE_ANGLE_GAIN = 0.1;
   BALANCE_ANGLE_SMOOTH_GAIN = 0.91;
 
