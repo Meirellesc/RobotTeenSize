@@ -73,6 +73,20 @@ bool MotionManager::Initialize(dynamixel::PacketHandler *packetHandler, dynamixe
 //Modo de Operação dos motores para controlar a posição e torque(atraves da corrente).
   m_CM730->write1ByteTxRx(portHandler, BROADCAST_ID, MX28::P_OPERATING_MODE, 5, &dxl_error);
 
+//Declarando os valores de PID dos bra�os para "Tremer" menos
+  for(int l = 1; l <=2 ;i++)
+  {
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_D_GAIN, 2000, &dxl_error);
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_P_GAIN, 400, &dxl_error);
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::GOAL_PWM, 450, &dxl_error);
+  }
+  for(l = 3; l <=6 ;i++)
+  {
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_D_GAIN, 3500, &dxl_error);
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_P_GAIN, 400, &dxl_error);
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::GOAL_PWM, 600, &dxl_error);
+  }
+  
 //Os motores não ligam se não der o Torque Enable.
   m_CM730->write1ByteTxRx(portHandler, BROADCAST_ID, MX28::P_TORQUE_ENABLE, 1, &dxl_error);
 
@@ -88,8 +102,9 @@ bool MotionManager::Initialize(dynamixel::PacketHandler *packetHandler, dynamixe
 //Declarando o valor limite da velocidade usado pelo P_PROFILE_VELOCITY.
   m_CM730->write4ByteTxRx(portHandler, BROADCAST_ID, MX28::P_VELOCITY_LIMIT, 1023, &dxl_error);
 
-  //Declarando o valor limite da aceleração usado pelo P_PROFILE_ACCELERATION.
+//Declarando o valor limite da aceleração usado pelo P_PROFILE_ACCELERATION.
   m_CM730->write4ByteTxRx(portHandler, BROADCAST_ID, MX28::P_ACCELERATION_LIMIT, 32767, &dxl_error);
+
 
 /*TESTE DA VELOCIDADE DO SERVO
   while(1){
