@@ -74,19 +74,22 @@ bool MotionManager::Initialize(dynamixel::PacketHandler *packetHandler, dynamixe
   m_CM730->write1ByteTxRx(portHandler, BROADCAST_ID, MX28::P_OPERATING_MODE, 5, &dxl_error);
 
 //Declarando os valores de PID dos bra�os para "Tremer" menos
-  for(int l = 1; l <=2 ;l++)
+  for(int l = 1; l <=6 ;l++)
   {
-		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 2000, &dxl_error);
-		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 400, &dxl_error);
-		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 450, &dxl_error);
-  }
-  for(int l = 3; l <=6 ;l++)
-  {
-		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 3500, &dxl_error);
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1000, &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 50, &dxl_error);
 		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 400, &dxl_error);
 		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 600, &dxl_error);
   }
-
+/*
+  for(int l = 7; l <=18 ;l++)
+  {
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 4000, &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 50, &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 400, &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 850, &dxl_error);
+  }
+*/
 //Os motores não ligam se não der o Torque Enable.
   m_CM730->write1ByteTxRx(portHandler, BROADCAST_ID, MX28::P_TORQUE_ENABLE, 1, &dxl_error);
 
