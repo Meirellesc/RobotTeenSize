@@ -163,6 +163,7 @@ class objectDetect():
         else:
             mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel2,1)
             mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
 
         
     # Se a morfologia de perto k =1, recorta a parte de cima
