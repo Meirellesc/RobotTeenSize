@@ -156,7 +156,7 @@ class objectDetect():
 
         if k ==1 or k==4:
     #    cv2.imshow('mask',white_mask)
-            kernel_teste = np.ones((35, 35), np.uint8)
+            kernel_teste = np.ones((20, 20), np.uint8)
             mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel_teste,1)
             mask = cv2.morphologyEx(mask, cv2.MORPH_ERODE, kernel)
             mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
