@@ -532,7 +532,7 @@ void MotionManager::adaptTorqueToVoltage()
   }
   count_fail=0;
 
-  if(voltage < 100)
+  if(voltage < 128)
   {
       count_volt++;
       if(count_volt>=4)

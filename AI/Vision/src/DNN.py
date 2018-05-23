@@ -116,7 +116,6 @@ class objectDetect():
 #=======
 
 
-
 #>>>>>>> vision-UmpaLumpa
         return frame, x, y, raio, BallFound, self.status
 
@@ -156,28 +155,29 @@ class objectDetect():
 
         if k ==1 or k==4:
     #    cv2.imshow('mask',white_mask)
-            kernel_teste = np.ones((35, 35), np.uint8)
+            kernel_teste = np.ones((20, 20), np.uint8)
             mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel_teste,1)
             mask = cv2.morphologyEx(mask, cv2.MORPH_ERODE, kernel)
             mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
         else:
-            mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel2,1)
-            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel,1)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel2)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel,1)
 
         
     # Se a morfologia de perto k =1, recorta a parte de cima
         if k ==1:
             mask[0:300,:]=0
-    # Se a morfologia medio k =2, recorta a parte de baixo
+    # Se a morfologia medio k =2, recorta a parte de cima
         if k ==2:
             mask[0:180,:]=0
 #            mask[720:,:]=0
     # Se a morfologia de longe k =3, recorta a parte de baixo
         if k ==3:
-            mask[350:,:]=0
+            mask[550:,:]=0
     # Se a morfologia de muito longe k = 4, recorta a parte de baixo
         if k ==4:
-            mask[300:,:]=0
+            mask[500:,:]=0
 
 
         ret,th1 = cv2.threshold(mask,25,255,cv2.THRESH_BINARY)
@@ -190,21 +190,20 @@ class objectDetect():
         for cnt in contours:
             contador = contador + 1
             x,y,w,h = cv2.boundingRect(cnt)
-            #Passa para o classificador as imagens recortadas-----------------------
-            type_label, results = classify(cv2.cvtColor(frame[y:y+h,x:x+w], cv2.COLOR_BGR2RGB),
-                                                               self.net, self.transformer,
-                                                               mean_file=self.mean_file, labels=self.labels,
-                                                               batch_size=None)
-            #-----------------------------------------------------------------------
+            if((w*1.0)/h)>0.5 and ((w*1.0)/h)<2: #permite apenas imagens proximas de um quadrado
+                #Passa para o classificador as imagens recortadas-----------------------
+                type_label, results = classify(cv2.cvtColor(frame[y:y+h,x:x+w], cv2.COLOR_BGR2RGB),
+                                                                   self.net, self.transformer,
+                                                                   mean_file=self.mean_file, labels=self.labels,
+                                                                   batch_size=None)
+                #-----------------------------------------------------------------------
 
-#                print results, type_label
-#               cv2.imshow('janela',images[0])
-            cv2.imwrite("/home/fei/Documents/frames_extracted_by_DNN/"+str(rd.random()) +"image.png", frame[y:y+h,x:x+w])
-            if type_label == 'Ball':
-
-
-                return frame, x+w/2, y+h/2, (w+h)/4, mask
-            #=================================================================================================
+    #                print results, type_label
+    #               cv2.imshow('janela',images[0])
+    #            cv2.imwrite("/home/fei/Documents/frames_extracted_by_DNN/"+str(rd.random()) +"image.png", frame[y:y+h,x:x+w])
+                if type_label == 'Ball':
+                    return frame, x+w/2, y+h/2, (w+h)/4, mask
+                #=================================================================================================
     #    print "CONTOURS = ", time.time() - start3
         return frame, 0, 0, 0, mask
 
