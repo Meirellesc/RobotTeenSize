@@ -81,15 +81,15 @@ bool MotionManager::Initialize(dynamixel::PacketHandler *packetHandler, dynamixe
 		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 400, &dxl_error);
 		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 600, &dxl_error);
   }
-/*
+/
   for(int l = 7; l <=18 ;l++)
   {
-    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 4000, &dxl_error);
-    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 50, &dxl_error);
-    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 400, &dxl_error);
-    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 850, &dxl_error);
+    //m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 4000, &dxl_error);
+    //m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 50, &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 1500, &dxl_error);
+    //m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 850, &dxl_error);
   }
-*/
+/
 //Os motores não ligam se não der o Torque Enable.
   m_CM730->write1ByteTxRx(portHandler, BROADCAST_ID, MX28::P_TORQUE_ENABLE, 1, &dxl_error);
 
