@@ -167,10 +167,10 @@ class objectDetect():
         
     # Se a morfologia de perto k =1, recorta a parte de cima
         if k ==1:
-            mask[0:300,:]=0
+            mask[0:250,:]=0
     # Se a morfologia medio k =2, recorta a parte de cima
         if k ==2:
-            mask[0:180,:]=0
+            mask[0:200,:]=0
 #            mask[720:,:]=0
     # Se a morfologia de longe k =3, recorta a parte de baixo
         if k ==3:
