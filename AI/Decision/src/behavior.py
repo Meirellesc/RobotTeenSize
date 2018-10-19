@@ -86,7 +86,6 @@ class TreatingRawData(object):
 
     ''''def get_head_pan_initial(self):
         return self.config.getint('Offset', 'ID_19')
-
     def get_head_tilt_initial(self):
         return self.config.getint('Offset', 'ID_20')'''
 
@@ -94,6 +93,8 @@ class TreatingRawData(object):
         time.sleep(0.1)
         return self.bkb.read_int(self.mem,'VISION_LOST')
 
+    def get_vision_status(self):
+        return self.bkb.read_int(self.mem,'VISION_STATE')
 
     def set_vision_search(self):
         return self.bkb.write_int(self.mem,'DECISION_SEARCH_ON', 1)
@@ -462,7 +463,7 @@ class NaiveIMUDecTurning(TreatingRawData):
         print
         print 'Naive behavior called with IMU and turning'
         print
-        self.kickoff_ctrl = 0
+        self.kickoff_ctrl = 0 #comecar em zero
 
     def decision(self, referee):
 
@@ -470,6 +471,7 @@ class NaiveIMUDecTurning(TreatingRawData):
         print self.get_motor_tilt_degrees()
         print "referee", referee
         print 'search status ', self.get_search_status()
+        self.kickoff_ctrl = 1
 
         if referee == 1:  # stopped
             self.ready_walk = 0
@@ -533,8 +535,7 @@ class NaiveIMUDecTurning(TreatingRawData):
             self.ready_walk = 0
             print 'walking forward in order to see anything'
             self.set_vision_ball()
-            self.set_walk_forward_slow(10)
-            for i in range(0,20):
+            for i in range(0,5):   #### - Entra no campo se nao estiver ouvindo juiz - 20
                 time.sleep(1)
                 print "Counting...", i
             self.kickoff_ctrl = 1
@@ -567,24 +568,37 @@ class NaiveIMUDecTurning(TreatingRawData):
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 self.set_stand_still()
-                self.set_walk_forward_slow((self.get_dist_ball() / 6))
-                for __ in xrange(20):
-                    time.sleep(1)
-                    if self.get_search_status() == 0:
-                        self.set_stand_still()
-                        break
+                for __ in xrange(5):
+                          if self.get_search_status() == 1:
+                                   self.set_turn_right()
+                                   time.sleep(1)                                
+                          if self.get_search_status() == 0:
+                                   self.set_stand_still()
+                                   self.set_vision_ball()
+                                   time.sleep(1)
+                                   break
+                          if referee==2:
+                                   break
+                self.set_stand_still()    
+             
+                     
+                     
+                  
+                                   
+                            
                 
-                self.set_stand_still()
-                for __ in xrange(20):
-                    time.sleep(1)
-                    if self.get_search_status() == 0:
-                        break
+               
+                # for __ in xrange(20):
+                #    time.sleep(1)
+                #    if self.get_search_status() == 0:
+                #        break
                 #thiago decision
                 #self.set_vision_search()
                 #self.set_turn_right()
-            elif self.get_search_status() == 0: # 0 - object found
+            if self.get_search_status() == 0: # 0 - object found
 		#print 'entre found'
                 # align to the ball
+                self.set_vision_ball()
                 if self.get_motor_pan_degrees() == 60:
                     self.set_turn_left()
                     #self.set_stand_still()
@@ -592,7 +606,6 @@ class NaiveIMUDecTurning(TreatingRawData):
                     self.set_turn_right()
                     #self.set_stand_still()
                 else:
-
                     print self.get_orientation()
                     if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
 			            #print 'entrei'
@@ -630,8 +643,8 @@ class NaiveIMUDecTurning(TreatingRawData):
                     else:
                         self.set_walk_forward_slow((self.get_dist_ball() / 6))
 
-                        # time.sleep(0.5)
-                        # self.set_stand_still()
+                         #time.sleep(0.2)
+                         #self.set_stand_still()
         else:
             print 'Invalid argument received from referee!'
             print referee
