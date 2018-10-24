@@ -74,19 +74,26 @@ bool MotionManager::Initialize(dynamixel::PacketHandler *packetHandler, dynamixe
   m_CM730->write1ByteTxRx(portHandler, BROADCAST_ID, MX28::P_OPERATING_MODE, 5, &dxl_error);
 
 //Declarando os valores de PID dos bra�os para "Tremer" menos
-  for(int l = 1; l <=6 ;l++)
+  for(int l = 1; l <=8 ;l++)
   {
 		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1000, &dxl_error);
-    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 50, &dxl_error);
-		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 400, &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 1000, &dxl_error);
 		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 600, &dxl_error);
   }
-
-  for(int l = 7; l <=18 ;l++)
+  for(int l = 9; l <=10 ;l++)
   {
-    //m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 4000, &dxl_error);
-    //m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 50, &dxl_error);
-    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 1500, &dxl_error);
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 8000, &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 5000, &dxl_error);
+		//m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 600, &dxl_error);
+  }
+
+  for(int l = 11; l <=18 ;l++)
+  {
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1000, &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 1000, &dxl_error);
     //m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 850, &dxl_error);
   }
 
@@ -347,21 +354,25 @@ void MotionManager::Process()
 //            MotionStatus::FALLEN = STANDUP;
 
 
-	for (size_t id = 1; id < 9; id++) {
-		MotionStatus::m_CurrentJoints.SetPGain(id, 1000);
-		MotionStatus::m_CurrentJoints.SetIGain(id, 0);
-		MotionStatus::m_CurrentJoints.SetDGain(id, 1000);
-	}
-	for (size_t id = 9; id < 11; id++) {
-		MotionStatus::m_CurrentJoints.SetPGain(id, 4000);
-		MotionStatus::m_CurrentJoints.SetIGain(id, 0);
-		MotionStatus::m_CurrentJoints.SetDGain(id, 4000);
-	}
-	for (size_t id = 11; id <= JointData::ID_MAX; id++) {
-		MotionStatus::m_CurrentJoints.SetPGain(id, 8000);
-		MotionStatus::m_CurrentJoints.SetIGain(id, 0);
-		MotionStatus::m_CurrentJoints.SetDGain(id, 5000);
-	}
+ 	if(m_Modules.size() != 0)
+	{
+		for(std::list<MotionModule*>::iterator i = m_Modules.begin(); i != m_Modules.end(); i++)
+		{
+			(*i)->Process();
+			for(int id=JointData::ID_MIN; id<=JointData::ID_MAX; id++)
+			{
+				if((*i)->m_Joint.GetEnable(id) == true)
+				{
+//				MotionStatus::m_CurrentJoints.SetSlope(id, (*i)->m_Joint.GetCWSlope(id), (*i)->m_Joint.GetCCWSlope(id));
+         MotionStatus::m_CurrentJoints.SetValue(id, (*i)->m_Joint.GetValue(id));
+				 MotionStatus::m_CurrentJoints.SetPGain(id, (*i)->m_Joint.GetPGain(id));
+				 MotionStatus::m_CurrentJoints.SetIGain(id, (*i)->m_Joint.GetIGain(id));
+				 MotionStatus::m_CurrentJoints.SetDGain(id, (*i)->m_Joint.GetDGain(id));
+
+				}
+			}
+		}
+
 // 	if(m_Modules.size() != 0)
 //	{
 //		for(std::list<MotionModule*>::iterator i = m_Modules.begin(); i != m_Modules.end(); i++)
@@ -380,7 +391,7 @@ void MotionManager::Process()
 //				}
 //			}
 //		}
-//	}
+	}
 	//uint8_t param[JointData::NUMBER_OF_JOINTS * MX28::PARAM_BYTES];
 
   //param = new uint8_t[21 * (1 + 5)];

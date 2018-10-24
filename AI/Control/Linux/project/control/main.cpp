@@ -75,6 +75,10 @@ int Initialize_servo(dynamixel::PacketHandler *packetHandler, dynamixel::PortHan
 
 void logInit();
 
+void PidMotion(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler);
+
+void PidStatic(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler);
+
 void change_current_dir()
 {
     char exepath[1024] = {0};
@@ -259,13 +263,18 @@ int main(int argc, char **argv)
                     buffer=key;
                 else
                     buffer=0;
-		            same_moviment=false;
+                   same_moviment=false;
+                //Altera o torque dos motores pelos valores do PID
+                if(key==116)
+                    PidStatic(packetHandler, portHandler);
+                else
+                    PidMotion(packetHandler, portHandler);
             }
             else
-	          {
+            {
                 key=buffer;
-		            same_moviment=true;
-	          }
+                same_moviment=true;
+            }
             //-------------------------------------------------------------------------
 
             switch(key)
@@ -400,6 +409,11 @@ int main(int argc, char **argv)
                 same_moviment = false;
                 std::cout<< "\nAction " << read_int(mem, DECISION_ACTION_A); // Mostra o valor da ação
                 count_read=0;
+                //Altera o torque dos motores pelos valores do PID
+                if(read_int(mem, DECISION_ACTION_A) == 0)
+                    PidStatic(packetHandler, portHandler);
+                else
+                    PidMotion(packetHandler, portHandler);
             }
             buffer = read_int(mem, DECISION_ACTION_A);
             //------------------------------------------------------------
@@ -725,4 +739,30 @@ void logInit()
         }
         else
 	    printf("Erro ao Salvar o arquivo\n");
+}
+
+void PidMotion(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
+{
+  for(int l = 7; l <=18 ;l++)
+  {
+//    cout<<"Torque alto"<<endl;
+    uint8_t dxl_error = 0;
+//    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1000, &dxl_error);
+//    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 1500, &dxl_error);
+    //packetHandler->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 850, &dxl_error);
+  }
+}
+
+void PidStatic(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
+{
+//    cout<<"Torque baixo"<<endl;
+    uint8_t dxl_error = 0;
+  for(int l = 7; l <=18 ;l++)
+  {
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1000, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 1000, &dxl_error);
+    //packetHandler->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 850, &dxl_error);
+  }
 }
