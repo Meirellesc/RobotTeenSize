@@ -9,7 +9,6 @@ import ctypes
 import argparse
 import time
 from math import log,exp,tan,radians
-import thread
 from camvideostream import WebcamVideoStream
 import imutils
 from ClassConfig import *
@@ -47,11 +46,6 @@ Mem = bkb.shd_constructor(mem_key)
 
 parser = argparse.ArgumentParser(description='Robot Vision', epilog= 'Responsavel pela deteccao dos objetos em campo / Responsible for detection of Field objects')
 parser.add_argument('--visionball', '--vb', action="store_true", help = 'Calibra valor para a visao da bola')
-parser.add_argument('--visionMask', '--vm', action="store_true", help = 'Calibra valor para a visao da bola')
-parser.add_argument('--visionMorph1', '--vm1', action="store_true", help = 'Mostra a imagem da morfologia perto')
-parser.add_argument('--visionMorph2', '--vm2', action="store_true", help = 'Mostra a imagem da morfologia medio')
-parser.add_argument('--visionMorph3', '--vm3', action="store_true", help = 'Mostra a imagem da morfologia longe') 
-parser.add_argument('--visionMorph4', '--vm4', action="store_true", help = 'Mostra a imagem da morfologia muito longe') 
 parser.add_argument('--withoutservo', '--ws', action="store_true", help = 'Servos desligado')
 parser.add_argument('--head', '--he', action="store_true", help = 'Configurando parametros do controle da cabeca')
 
@@ -98,6 +92,7 @@ class ballStatus():
 				print ("Bola a Direita")
 
 
+
 	#	#CUIDADO AO ALTERAR OS VALORES ABAIXO!! O código abaixo possui inversão de eixos!
 	#	# O eixo em pixels é de cima para baixo ja as distancias são ao contrario.
 	#	# Quanto mais alto a bola na tela menor o valor em pixels 
@@ -124,15 +119,18 @@ def thread_DNN():
 	start1 = time.time()
 #===============================================================================
 	ball = False
-	frame_b, x, y, raio, ball, status= detectBall.searchball(frame, args2.visionMask, args2.visionMorph1, args2.visionMorph2, args2.visionMorph3, args2.visionMorph4)
+	frame_b, x, y, raio, ball, status, statusLost = detectBall.searchball(frame)
 	print "tempo de varredura = ", time.time() - start1
 	if ball ==False:
-		bkb.write_int(Mem,'VISION_LOST', 1)
+		bkb.write_int(Mem,'VISION_STATE', 0)
+		if statusLost == True:
+			bkb.write_int(Mem,'VISION_LOST', 1)
 	else:
+		bkb.write_int(Mem,'VISION_STATE', 1)
 		bkb.write_int(Mem,'VISION_LOST', 0)
 		ballS.BallStatus(x,y,status)
 	if args2.visionball:
-		cv2.circle(frame_b, (x, y), raio, (0, 255, 0), 4)
+		cv2.circle(frame_b, (x, y), raio, (255, 0, 0), 4)
 		cv2.imshow('frame', cv2.resize(frame_b, (720, 480)))
 #===============================================================================
 #	print "tempo de varredura = ", time.time() - start
@@ -151,68 +149,25 @@ if __name__ == '__main__':
 
 	config = classConfig()
 
-	tmpdir = unzip_archive("./nets/"+config.DNN_type)
-	caffemodel = None
-	deploy_file = None
-	mean_file = None
-	labels_file = None
-	for filename in os.listdir(tmpdir):
-		full_path = os.path.join(tmpdir, filename)
-		if filename.endswith('.caffemodel'):
-			caffemodel = full_path
-		elif filename == 'deploy.prototxt':
-			deploy_file = full_path
-		elif filename.endswith('.binaryproto'):
-			mean_file = full_path
-		elif filename == 'labels.txt':
-			labels_file = full_path
-		else:
-			print 'Unknown file:', filename
-
-	assert caffemodel is not None, 'Caffe model file not found'
-	assert deploy_file is not None, 'Deploy file not found'
-
-###    # Load the model and images
-	net = get_net(caffemodel, deploy_file, use_gpu=False)
-	transformer = get_transformer(deploy_file, mean_file)
-	_, channels, height, width = transformer.inputs['data']
-	labels = read_labels(labels_file)
-
-###    #create index from label to use in decicion action
-	number_label =  dict(zip(labels, range(len(labels))))
-	print number_label
 ###    #
 	if args2.withoutservo == False:
 		Servo(config.CENTER_SERVO_PAN, config.POSITION_SERVO_TILT)
 	ballS = ballStatus(config)
-	detectBall = objectDetect(net, transformer, mean_file, labels, args2.withoutservo, config, bkb, Mem)
+	detectBall = objectDetect(args2.withoutservo, config, bkb, Mem)
 #	detectBall.servo.writeWord(config.SERVO_TILT_ID,34, 70)#olha para o centro
 	vcap = WebcamVideoStream(src=0).start() #Abrindo camera
 #        cap.set(3,1280) #720 1280 1920
 #        cap.set(4,720) #480 720 1080
 	os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
 	os.system("v4l2-ctl -d /dev/video0 -c saturation=200")#manter 200 para nao estourar LARC
-#	os.system("v4l2-ctl -d /dev/video0 -c brightness=128")
+	os.system("v4l2-ctl -d /dev/video0 -c brightness=128")
 
 	cut_right = 1280-config.cut_edge_image
 
-#	try:
-#            thread.start_new_thread(thread_DNN, ())
-#	except:
-#            print "Error Thread"
 
 	while True:
 
-#		if bkb.read_int(Mem,'IMU_STATE')==1:
-#			detectBall.servo.writeWord(config.SERVO_TILT_ID,34, 512)#olha para o centro
-#			detectBall.servo.writeWord(config.SERVO_TILT_ID,32, 1023)#velocidade
-#			detectBall.servo.writeWord(config.SERVO_PAN_ID,32, 1023)#velocidade
-#			detectBall.servo.writeWord(config.SERVO_TILT_ID,30, config.POSITION_SERVO_TILT+350)#olha para o centro
-#			time.sleep(0.5)
-#			detectBall.servo.writeWord(config.SERVO_TILT_ID,34, 100)#olha para o centro
-#			detectBall.servo.writeWord(config.SERVO_PAN_ID,30, config.CENTER_SERVO_PAN)#olha para o centro
-#		else:
-#			detectBall.servo.writeWord(config.SERVO_TILT_ID,30, config.POSITION_SERVO_TILT)#olha para o centro
+
 		bkb.write_int(Mem,'VISION_WORKING', 1) # Variavel da telemetria
 		frame = vcap.read()
 		frame = frame[:,config.cut_edge_image:cut_right]
