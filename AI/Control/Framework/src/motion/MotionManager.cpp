@@ -347,25 +347,40 @@ void MotionManager::Process()
 //            MotionStatus::FALLEN = STANDUP;
 
 
- 	if(m_Modules.size() != 0)
-	{
-		for(std::list<MotionModule*>::iterator i = m_Modules.begin(); i != m_Modules.end(); i++)
-		{
-			(*i)->Process();
-			for(int id=JointData::ID_MIN; id<=JointData::ID_MAX; id++)
-			{
-				if((*i)->m_Joint.GetEnable(id) == true)
-				{
-//				MotionStatus::m_CurrentJoints.SetSlope(id, (*i)->m_Joint.GetCWSlope(id), (*i)->m_Joint.GetCCWSlope(id));
-         MotionStatus::m_CurrentJoints.SetValue(id, (*i)->m_Joint.GetValue(id));
-				 MotionStatus::m_CurrentJoints.SetPGain(id, (*i)->m_Joint.GetPGain(id));
-				 MotionStatus::m_CurrentJoints.SetIGain(id, (*i)->m_Joint.GetIGain(id));
-				 MotionStatus::m_CurrentJoints.SetDGain(id, (*i)->m_Joint.GetDGain(id));
-
-				}
-			}
-		}
+	for (size_t id = 1; id < 9; id++) {
+		MotionStatus::m_CurrentJoints.SetPGain(id, 1000);
+		MotionStatus::m_CurrentJoints.SetIGain(id, 0);
+		MotionStatus::m_CurrentJoints.SetDGain(id, 1000);
 	}
+	for (size_t id = 9; id < 11; id++) {
+		MotionStatus::m_CurrentJoints.SetPGain(id, 4000);
+		MotionStatus::m_CurrentJoints.SetIGain(id, 0);
+		MotionStatus::m_CurrentJoints.SetDGain(id, 4000);
+	}
+	for (size_t id = 11; id <= JointData::ID_MAX; id++) {
+		MotionStatus::m_CurrentJoints.SetPGain(id, 8000);
+		MotionStatus::m_CurrentJoints.SetIGain(id, 0);
+		MotionStatus::m_CurrentJoints.SetDGain(id, 5000);
+	}
+// 	if(m_Modules.size() != 0)
+//	{
+//		for(std::list<MotionModule*>::iterator i = m_Modules.begin(); i != m_Modules.end(); i++)
+//		{
+//			(*i)->Process();
+//			for(int id=JointData::ID_MIN; id<=JointData::ID_MAX; id++)
+//			{
+//				if((*i)->m_Joint.GetEnable(id) == true)
+//				{
+////				MotionStatus::m_CurrentJoints.SetSlope(id, (*i)->m_Joint.GetCWSlope(id), (*i)->m_Joint.GetCCWSlope(id));
+//         MotionStatus::m_CurrentJoints.SetValue(id, (*i)->m_Joint.GetValue(id));
+//				 MotionStatus::m_CurrentJoints.SetPGain(id, (*i)->m_Joint.GetPGain(id));
+//				 MotionStatus::m_CurrentJoints.SetIGain(id, (*i)->m_Joint.GetIGain(id));
+//				 MotionStatus::m_CurrentJoints.SetDGain(id, (*i)->m_Joint.GetDGain(id));
+
+//				}
+//			}
+//		}
+//	}
 	//uint8_t param[JointData::NUMBER_OF_JOINTS * MX28::PARAM_BYTES];
 
   //param = new uint8_t[21 * (1 + 5)];
