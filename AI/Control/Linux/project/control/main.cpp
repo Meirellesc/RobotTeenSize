@@ -367,11 +367,15 @@ int main(int argc, char **argv)
                     actionMove.greetings(stop_gait);
                 break;
 
+                case 119: //w
+                    PidMotion(packetHandler, portHandler);
+                 break;
+
                 case 122: //z
                     actionMove.goodBye(stop_gait);
                  break;
 
-                case 120: //z
+                case 120: //x
                     gaitMove.walk_foward_fast_direct(stop_gait, same_moviment);
                 break;
 

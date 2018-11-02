@@ -77,8 +77,8 @@ bool MotionManager::Initialize(dynamixel::PacketHandler *packetHandler, dynamixe
   for(int l = 1; l <=8 ;l++)
   {
 		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1000, &dxl_error);
-    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
-		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 1000, &dxl_error);
+    m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 50, &dxl_error);
+		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 400, &dxl_error);
 		m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 600, &dxl_error);
   }
   for(int l = 9; l <=10 ;l++)
