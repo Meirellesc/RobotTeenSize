@@ -751,9 +751,9 @@ void PidMotion(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *
   {
 //    cout<<"Torque alto"<<endl;
     uint8_t dxl_error = 0;
-    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 4000, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 3000, &dxl_error);
     packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
-    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 4000, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 2000, &dxl_error);
     //packetHandler->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 850, &dxl_error);
   }
 }
