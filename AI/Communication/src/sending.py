@@ -107,6 +107,6 @@ while(True):
     # End of Message
     message += 'OUT'
     # Send the message in broadcast for Telemetry
-    sock.sendto(message, (UDP_IP, UDP_PORT_TELE))
+    #sock.sendto(message, (UDP_IP, UDP_PORT_TELE))
 
     time.sleep(1)

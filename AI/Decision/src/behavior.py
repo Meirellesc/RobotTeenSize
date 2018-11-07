@@ -152,6 +152,10 @@ class TreatingRawData(object):
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 9)
         #time.sleep(1) #Tempo de Giro
 
+    def goalkeeper(self):
+        print 'goalkeeperposition'
+        self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 10)
+
     def set_revolve_around_ball_anticlockwise(self):
         print 'revolve around ball - anticlockwise'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 14)
@@ -169,11 +173,22 @@ class TreatingRawData(object):
         print 'pass left'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 12)
         self.flag_move_ac = True
+        
+    def kick_right_weak(self):
+        print 'right kick weak'
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 21)
+        self.flag_move_ac = True     
+
+    def kick_left_weak(self):
+        print 'right kick weak'
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 22)
+        self.flag_move_ac = True
 
     def set_pass_right(self):
         print 'pass right'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 13)
         self.flag_move_ac = True
+        
 
     def set_vision_ball(self):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 0)
@@ -182,7 +197,7 @@ class TreatingRawData(object):
     def set_vision_robot(self):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 2)
         #return time.sleep(2)
-   
+    
     def go_back_and_align(self):
         for i in range(self.count_steps):
             self.set_walk_backward()
@@ -464,7 +479,8 @@ class NaiveIMUDecTurning(TreatingRawData):
         print 'Naive behavior called with IMU and turning'
         print
         self.kickoff_ctrl = 0 #comecar em zero
-
+        self.larc_kickoff = 1 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
+        
     def decision(self, referee):
 
         print self.get_motor_pan_degrees()
@@ -481,20 +497,28 @@ class NaiveIMUDecTurning(TreatingRawData):
         elif referee == 11:  # ready
             print 'ready'
             #new rule: the robot must to enter in the soccer field
-            #self.set_stand_still()
+            self.set_stand_still()
+            self.larc_kickoff = 1 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
+            
             #ele apenas anda, sem procurar a bola. no set ele começa a procurar.
             #talvez seja necessário retirar o if da linha 486, onde ele anda por 20 segundos.
             #self.set_vision_ball()
 
             #o ready é de 30s. Se ele estiver andando muito rápido, trocar por walkslow.
-            if self.ready_walk == 0:
-                self.ready_walk = 1
-                self.set_walk_forward()
-                for __ in np.arange(0,15,0.5):
-                    time.sleep(0.4)
-                    if self.get_search_status() == 0:
-                        break
-                self.set_stand_still()
+
+          
+#o seguinte deve ser comentado apenas para o larc
+#            if self.ready_walk == 0:
+#                self.ready_walk = 1
+#                self.set_walk_forward()
+#                for __ in np.arange(0,15,0.5):
+#                    time.sleep(0.4)
+#                    if self.get_search_status() == 0:
+#                        break
+#                self.set_stand_still()
+
+
+
 
         elif referee == 12:  # set
             self.ready_walk = 0
@@ -533,7 +557,6 @@ class NaiveIMUDecTurning(TreatingRawData):
 
         elif referee == 2 and self.kickoff_ctrl == 0 and self.get_search_status() == 1:
             self.ready_walk = 0
-            print 'walking forward in order to see anything'
             self.set_vision_ball()
             for i in range(0,5):   #### - Entra no campo se nao estiver ouvindo juiz - 20
                 time.sleep(1)
@@ -568,10 +591,10 @@ class NaiveIMUDecTurning(TreatingRawData):
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 self.set_stand_still()
-                for __ in xrange(5):
+                for __ in xrange(10):
                           if self.get_search_status() == 1:
                                    self.set_turn_right()
-                                   time.sleep(1)                               
+                                   time.sleep(1)                              
                           if self.get_search_status() == 0:
                                    self.set_stand_still()
                                    self.set_vision_ball()
@@ -579,15 +602,15 @@ class NaiveIMUDecTurning(TreatingRawData):
                                    break
                           if referee==2:
                                    break
-                self.set_stand_still()   
-            
-                    
-                    
-                 
-                                  
-                           
-               
+                self.set_stand_still()  
+           
+                   
+                   
+                
+                                 
+                          
               
+             
                 # for __ in xrange(20):
                 #    time.sleep(1)
                 #    if self.get_search_status() == 0:
@@ -610,7 +633,17 @@ class NaiveIMUDecTurning(TreatingRawData):
                     if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
                         #print 'entrei'
                         if self.get_orientation() <= 30 and self.get_orientation() >= -30:
-                            self.set_kick_right()
+                            if self.larc_kickoff==0:
+                                self.set_kick_right()
+                                time.sleep(4)
+                            else:
+                                self.larc_kickoff=0
+                                time.sleep(0.5)
+                                self.set_walk_forward()
+                                self.kick_right_weak()
+#                                time.sleep(4)
+#                                self.set_walk_forward()
+#                                self.set_stand_still()
                         elif self.get_orientation() > 30:
                             #revolve_clockwise:
                             #self.set_pass_right()
@@ -623,7 +656,17 @@ class NaiveIMUDecTurning(TreatingRawData):
                             #########
                     elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:
                         if self.get_orientation() <= 30 and self.get_orientation() >= -30:
-                            self.set_kick_left()
+                            if self.larc_kickoff==0:
+                                self.set_kick_left()
+                                time.sleep(2)
+                            else:
+                                self.larc_kickoff=0
+                                time.sleep(0.5)
+                                self.set_walk_forward()
+                                self.kick_left_weak()
+#                                time.sleep(4)
+#                                self.set_walk_forward()
+#                                self.set_stand_still()
                         elif self.get_orientation() > 30:
                             #revolve_clockwise:
                             #self.set_pass_right()
@@ -787,7 +830,6 @@ class GolieSimulator(Ordinary):
             print referee
 
 
-
 class Golie(Ordinary):
     " " " Golie class " " "
 
@@ -797,9 +839,8 @@ class Golie(Ordinary):
         print  'Golie behavior called'
         print
         self.kickoff_ctrl = 0
-        self.x=0 #tempo de passos para a direita
-        self.y=0 #tempo de passos para esquerda
-        self.z=0 #tempo de passos para a frente
+        self.y=0 #variavel para controlar o robo para nao sair do gol
+        self.x=0 #contador de passos  para a >0 direita e <0 esquerda
 
     def decision(self, referee):
         print self.get_motor_pan_degrees()
@@ -821,7 +862,7 @@ class Golie(Ordinary):
 
 
         elif referee == 2:  # play
-           
+          
             self.kickoff_ctrl = 1
             #print 'dist_ball', self.get_dist_ball()
             print 'orientation', self.get_orientation()
@@ -832,98 +873,52 @@ class Golie(Ordinary):
 
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
+                
                 #self.go_back_and_align()
-                self.set_stand_still()
+                self.goalkeeper()
+
+                #self.set_stand_still()
                 #thiago decision
                 self.set_vision_search()
                 #self.set_turn_right()
             elif self.get_search_status() == 0: # 0 - object found
                 # align to the ball
-                    while self.get_motor_pan_degrees() == 60 and self.get_search_status() == 0 and referee==2 :
+                    while self.get_motor_pan_degrees() == 60 and self.get_search_status() == 0 and self.x>-220 and referee==2:  #
                          self.set_sidle_left()
-                         self.y=self.y+1
-                         print 'sidle left'
-                         if self.x>0:
-                           self.x=self.x-1
-                    #self.set_stand_still()
-                    while self.get_motor_pan_degrees() == -60 and self.get_search_status() == 0 and referee==2 :
-                         self.set_sidle_right()
-                         print 'sidle right'
-                         self.x=self.x+1
-                         if self.y>0:
-                           self.y=self.y-1
-                    #self.set_stand_still()
-                         
-
-
-
-
-                    while (self.get_motor_tilt_degrees() > 90 or self.get_search_status() == 1) and referee==2 and self.y>0 :
-                         self.set_sidle_right()
-                         print 'going right to correct'
-                         self.y=self.y-1
-                         
-                    while (self.get_motor_tilt_degrees() > 90 or self.get_search_status() == 1) and referee==2 and self.x>0 :
-                         self.set_sidle_left()
-                         print 'going left to correct'
                          self.x=self.x-1
-                           
+                    while self.get_motor_pan_degrees() == -60 and self.get_search_status() == 0 and self.x<220 and referee==2:
+                         self.set_sidle_right()
+                         self.x=self.x+1
+                         
                     self.set_stand_still()
-
-
-
 
                     if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
                         if self.get_orientation() <= 40 and self.get_orientation() >= -40:
                             self.set_kick_right()
-                        elif self.get_orientation() > 40:
-                            #revolve_clockwise:
-                            self.set_pass_right()
-                            #########
-                        elif self.get_orientation() < -40:
-                            #revolve_anticlockwise:
-                            self.set_pass_left()
-                            #########
+               
                     elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:
                         if self.get_orientation() <= 40 and self.get_orientation() >= -40:
                             self.set_kick_left()
-                        elif self.get_orientation() > 40:
-                            #revolve_clockwise:
-                            self.set_pass_right()
-                            #########
-                        elif self.get_orientation() < -40:
-                            #revolve_anticlockwise:
-                            self.set_pass_left()
-                            #########                      
+                            #########                     
+
+                    #elif self.get_motor_tilt_degrees() == 10 and self.y==0:
+                     #        self.y=1
+                     #        while self.get_motor_tilt_degrees() >2 and referee ==2:
+                     #             self.walk_forward()
+
+
+
                     elif self.get_motor_tilt_degrees() < 70:
                         #self.set_walk_forward_slow((self.get_dist_ball() / 6))
                         self.count_steps += 1
                         print 'steps: ',self.count_steps
-
-
-
-                    while self.get_motor_tilt_degrees() > 0 and self.get_motor_tilt_degrees() < 20 and referee==2 :
-                        self.set_walk_forward()
-                        self.z=self.z+1
-                        #ir para a frente se a bola estiver muito perto
-                    
-                    while self.z>0 and referee==2 and (self.get_search_status() == 1 or self.get_motor_tilt_degrees() > 90)  :
-                        self.set_walk_backward()
-                        self.z=self.z-1
-
-                    self.set_stand_still()
-                    #else:
-                     #   self.go_back_and_align()
-                      #  self.set_stand_still()
-
+                    else:
+                        self.go_back_and_align()
+                        #self.set_stand_still()
+                        self.goalkeeper()
 
                         # time.sleep(0.5)
                         # self.set_stand_still()
         else:
             print 'Invalid argument received from referee!'
             print referee
-
-
-
-
-
