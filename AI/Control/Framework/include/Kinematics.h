@@ -24,11 +24,11 @@ namespace Robot
 	public:
 		static const double CAMERA_DISTANCE = 33.2; //mm
 		static const double EYE_TILT_OFFSET_ANGLE = 40.0; //degree
-		static const double LEG_SIDE_OFFSET = 37.0; //mm
-		static const double THIGH_LENGTH = 105.0; //mm
-		static const double CALF_LENGTH = 105.0; //mm
-		static const double ANKLE_LENGTH = 33.5; //mm
-		static const double LEG_LENGTH = 243.5; //mm (THIGH_LENGTH + CALF_LENGTH + ANKLE_LENGTH)
+		static const double LEG_SIDE_OFFSET = 55.0; //mm
+		static const double THIGH_LENGTH = 166.75; //mm
+		static const double CALF_LENGTH = 166.75; //mm
+		static const double ANKLE_LENGTH = 61; //mm
+		static const double LEG_LENGTH = 394.5; //mm (THIGH_LENGTH + CALF_LENGTH + ANKLE_LENGTH)
 
 		~Kinematics();
 
