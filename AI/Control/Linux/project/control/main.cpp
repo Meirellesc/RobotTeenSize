@@ -364,7 +364,9 @@ int main(int argc, char **argv)
                 break;
 
                 case 104: //h
+                    PidMotion(packetHandler, portHandler);
                     actionMove.greetings(stop_gait);
+                    PidStatic(packetHandler, portHandler);
                 break;
 
                 case 119: //w
@@ -747,7 +749,7 @@ void logInit()
 
 void PidMotion(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
 {
-  for(int l = 7; l <=18 ;l++)
+  for(int l = 3; l <=18 ;l++)
   {
 //    cout<<"Torque alto"<<endl;
     uint8_t dxl_error = 0;
@@ -762,7 +764,7 @@ void PidStatic(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *
 {
 //    cout<<"Torque baixo"<<endl;
     uint8_t dxl_error = 0;
-  for(int l = 7; l <=18 ;l++)
+  for(int l = 3; l <=18 ;l++)
   {
     packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1000, &dxl_error);
     packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
