@@ -1,5 +1,6 @@
 #coding: utf-8
 import os
+import sys
 
 from lib_robotis import USB2Dynamixel_Device
 
@@ -33,20 +34,23 @@ def findInfo(porta):
 #    print string
 
     index = string.find("{serial}==")
-    serial = string[index+11:index+19]
+    serial = string[index+11:index+50]
+    serial = serial.split("\"")
+    serial = serial[0]
 
-
-    index = string.find("ATTRS{devpath}==")
-    devpath = string[index+16:index+18]
     
     index = string.find("ATTRS{idProduct}==")
-    idProduct = string[index+19:index+23]
+    idProduct = string[index+19:index+50]
+    idProduct = idProduct.split("\"")
+    idProduct = idProduct[0]
 
     index = string.find("ATTRS{idVendor}==")
-    idVendor = string[index+18:index+22]
+    idVendor = string[index+18:index+50]
+    idVendor = idVendor.split("\"")
+    idVendor = idVendor[0]
 
 #    print serial, idProduct, idVendor, devpath
-    return serial, idProduct, idVendor, devpath
+    return serial, idProduct, idVendor
 
 
 for i in range(0,4):
@@ -68,20 +72,22 @@ for i in range(0,4):
 #print "portahead", portahead
 #print "portabody", portabody
 try:
-    HEADserial, HEADidProduct, HEADidVendor, HEADdevpath = findInfo(portahead)
+    HEADserial, HEADidProduct, HEADidVendor = findInfo(portahead)
     f1 = open("/etc/udev/rules.d/41-ftdi-head.rules", "w")
-    f1.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(HEADidVendor)+"\",  ATTRS{idProduct}==\""+str(HEADidProduct)+"\", ATTRS{devpath}=="+str(HEADdevpath)+"\", ATTRS{serial}==\""+str(HEADserial)+"\", MODE=\"0777\", SYMLINK+=\"robot/head\"\n")
+    f1.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(HEADidVendor)+"\",  ATTRS{idProduct}==\""+str(HEADidProduct)+"\", ATTRS{serial}==\""+str(HEADserial)+"\", MODE=\"0777\", SYMLINK+=\"robot/head\"\n")
     f1.close()
 except:
+    print(sys.exc_info())
     print "Não foi possivel criar as regras head"
     print "Verifique se a chave que liga os servos motores está na posição ligada."
     
 try:
-    BODYserial, BODYidProduct, BODYidVendor, BODYdevpath = findInfo(portabody)
+    BODYserial, BODYidProduct, BODYidVendor = findInfo(portabody)
     f2 = open("/etc/udev/rules.d/41-ftdi-body.rules", "w")
-    f2.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(BODYidVendor)+"\",  ATTRS{idProduct}==\""+str(BODYidProduct)+"\", ATTRS{devpath}=="+str(BODYdevpath)+"\", ATTRS{serial}==\""+str(BODYserial)+"\", MODE=\"0777\", SYMLINK+=\"robot/body\"")
+    f2.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(BODYidVendor)+"\",  ATTRS{idProduct}==\""+str(BODYidProduct)+"\", ATTRS{serial}==\""+str(BODYserial)+"\", MODE=\"0777\", SYMLINK+=\"robot/body\"")
     f2.close()
 except:
+    print(sys.exc_info())
     print "Não foi possivel criar as regras body"
     print "Verifique se a chave que liga os servos motores está na posição ligada."
 
