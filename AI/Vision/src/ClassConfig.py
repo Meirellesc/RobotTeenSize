@@ -23,17 +23,6 @@ class classConfig():
 		self.head_up = None
 		self.cut_edge_image = None
 
-		self.kernel_perto = None
-		self.kernel_perto2 = None
-	
-		self.kernel_medio = None
-		self.kernel_medio2 = None
-
-		self.kernel_longe = None
-		self.kernel_longe2 = None
-
-		self.kernel_muito_longe = None
-		self.kernel_muito_longe2 = None
 
 		self.x_left = None
 		self.x_center_left = None
