@@ -284,6 +284,13 @@ void MotionManager::Process()
         //m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_TORQUE_LIMIT_L, m_torque_count, 0);
         m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_GOAL_CURRENT, m_torque_count, &dxl_error);
 
+        if(m_torque_count == 2047)
+        {
+        m_CM730->write2ByteTxRx(portHandler, 3, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+        m_CM730->write2ByteTxRx(portHandler, 4, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+        m_CM730->write2ByteTxRx(portHandler, 5, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+        m_CM730->write2ByteTxRx(portHandler, 6, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+        }
 /*TESTE PARA LIGAR O SERVO
         m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_GOAL_POSITION, 2048, &dxl_error);
 
