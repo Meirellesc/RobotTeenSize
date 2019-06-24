@@ -106,6 +106,12 @@ bool MotionManager::Initialize(dynamixel::PacketHandler *packetHandler, dynamixe
 //Declarando o valor limite de corrente dos motores, no caso 2047 é o máx.
   m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_CURRENT_LIMIT, 2047, &dxl_error);
 
+//Valor máximo do torque dos motores MX-64 é 1941=================================
+  m_CM730->write2ByteTxRx(portHandler, 3, MX28::P_CURRENT_LIMIT, 1941, &dxl_error);
+  m_CM730->write2ByteTxRx(portHandler, 4, MX28::P_CURRENT_LIMIT, 1941, &dxl_error);
+  m_CM730->write2ByteTxRx(portHandler, 5, MX28::P_CURRENT_LIMIT, 1941, &dxl_error);
+  m_CM730->write2ByteTxRx(portHandler, 6, MX28::P_CURRENT_LIMIT, 1941, &dxl_error);
+
 //Valor do Goal Current para os motores iniciarem o código "quase" soltos, se não pode dar o tranco.
   m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_GOAL_CURRENT, 2, &dxl_error);
 
@@ -286,11 +292,12 @@ void MotionManager::Process()
 
         if(m_torque_count == 2047)
         {
-        m_CM730->write2ByteTxRx(portHandler, 3, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
-        m_CM730->write2ByteTxRx(portHandler, 4, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
-        m_CM730->write2ByteTxRx(portHandler, 5, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
-        m_CM730->write2ByteTxRx(portHandler, 6, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+            m_CM730->write2ByteTxRx(portHandler, 3, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+            m_CM730->write2ByteTxRx(portHandler, 4, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+            m_CM730->write2ByteTxRx(portHandler, 5, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+            m_CM730->write2ByteTxRx(portHandler, 6, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
         }
+
 /*TESTE PARA LIGAR O SERVO
         m_CM730->write4ByteTxRx(portHandler, 7, MX28::P_GOAL_POSITION, 2048, &dxl_error);
 
