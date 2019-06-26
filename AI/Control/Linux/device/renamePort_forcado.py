@@ -61,7 +61,7 @@ for i in range(0,4):
 #        print servos, tipo
         portahead = "/dev/ttyUSB1"
 #            print "portahead", portahead
-        portabody = "/dev/ttyUSB0"
+        portabody = "/dev/ttyUSB2"
 #            print "portabody", portabody
     except:
         print "nao tem servo conectado"
@@ -74,7 +74,7 @@ for i in range(0,4):
 try:
     HEADserial, HEADidProduct, HEADidVendor = findInfo(portahead)
     f1 = open("/etc/udev/rules.d/41-ftdi-head.rules", "w")
-    f1.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(HEADidVendor)+"\",  ATTRS{idProduct}==\""+str(HEADidProduct)+"\", ATTRS{serial}==\""+str(HEADserial)+"\", MODE=\"0777\", SYMLINK+=\"robot/head\"\n")
+    f1.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(HEADidVendor)+"\",  ATTRS{idProduct}==\""+str(HEADidProduct)+"\", MODE=\"0777\", SYMLINK+=\"robot/head\"\n")
     f1.close()
 except:
     print(sys.exc_info())
@@ -84,7 +84,7 @@ except:
 try:
     BODYserial, BODYidProduct, BODYidVendor = findInfo(portabody)
     f2 = open("/etc/udev/rules.d/41-ftdi-body.rules", "w")
-    f2.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(BODYidVendor)+"\",  ATTRS{idProduct}==\""+str(BODYidProduct)+"\", ATTRS{serial}==\""+str(BODYserial)+"\", MODE=\"0777\", SYMLINK+=\"robot/body\"")
+    f2.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(BODYidVendor)+"\",  ATTRS{idProduct}==\""+str(BODYidProduct)+"\", MODE=\"0777\", SYMLINK+=\"robot/body\"")
     f2.close()
 except:
     print(sys.exc_info())
