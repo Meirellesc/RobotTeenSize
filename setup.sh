@@ -103,6 +103,11 @@ then
 		cd ../..
 	done
 else
+	echo -e "${blue} Installing Dynamixel python framework ${NC}"
+    cd AI/Vision/src/python/
+    sudo python setup.py install
+    cd ../../../..
+
 	echo -e "${blue} ***** REAL MODE ***** ${NC}"
 	sleep 1
 	echo -e "${blue} Installing serial ${NC}"
