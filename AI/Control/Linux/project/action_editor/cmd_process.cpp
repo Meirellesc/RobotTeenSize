@@ -960,6 +960,8 @@ void HelpCmd()
 	printf(" i [index]          Inserts data from STP7 to STP[index]. \n" \
 	       "                    Moves data from STP[index] to STP[index+1].\n");
 	printf(" m [index] [index2] Moves data from [index] to [index2] step.\n");
+	printf(" z                  PID in maximum torque. \n");
+	printf(" x                  PID in minimum torque. \n");
 	printf(" d [index]          Deletes data from STP[index]. \n"
 	       "                    Pushes data from STP[index] to STP[index-1].\n");
 	printf(" on/off             Turn On/Off torque from ALL actuators.\n");
