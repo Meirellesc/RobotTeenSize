@@ -67,12 +67,15 @@ void sighandler(int sig)
     exit(0);
 }
 
+void PidMotion(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler);
+
+void PidStatic(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler);
+
 
 //////////////////// Framework Initialize ////////////////////////////
 // ---- Open USBDynamixel -----------------------------------------------{
 // int Initialize_servo(char *string1)
 int Initialize_servo(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
-
 {
   bool servoConectado = false;
   int idServo;
@@ -330,7 +333,9 @@ int main(int argc, char *argv[])
                     }
                     else if(strcmp(cmd, "play") == 0)
                     {
+                        PidMotion(packetHandler, portHandler);
                         PlayCmd(packetHandler, portHandler);
+                        PidStatic(packetHandler, portHandler);
                     }
                     else if(strcmp(cmd, "set") == 0)
                     {
@@ -385,7 +390,11 @@ int main(int argc, char *argv[])
                     else if(strcmp(cmd, "g") == 0)
                     {
                         if(num_param > 0)
+                        {
+                            PidMotion(packetHandler, portHandler);
                             GoCmd(packetHandler, portHandler, iparam[0]);
+                            PidStatic(packetHandler, portHandler);
+                        }
                         else
                             PrintCmd("Need parameter");
                     }
@@ -395,12 +404,18 @@ int main(int argc, char *argv[])
                         NameCmd();
                     else if(strcmp(cmd, "t") == 0)
 					{
+					    PidMotion(packetHandler, portHandler);
 						goInitPage();
 						PlayCmd(packetHandler, portHandler);
 						backToPage();
+						PidStatic(packetHandler, portHandler);
 					}
                     else if(strcmp(cmd, "read") == 0)
 						readServo(packetHandler, portHandler);
+					else if(strcmp(cmd, "z") == 0)
+						PidMotion(packetHandler, portHandler);
+					else if(strcmp(cmd, "x") == 0)
+						PidStatic(packetHandler, portHandler);
 					else
                         PrintCmd("Bad command! please input 'help'");
                 }
@@ -414,3 +429,33 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+
+void PidMotion(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
+{
+  for(int l = 1; l <=18 ;l++)
+  {
+//    cout<<"Torque alto"<<endl;
+    uint8_t dxl_error = 0;
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 3000, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 2000, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 885, &dxl_error);
+  }
+}
+
+void PidStatic(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
+{
+//    cout<<"Torque baixo"<<endl;
+    uint8_t dxl_error = 0;
+  for(int l = 1; l <=18 ;l++)
+  {
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1000, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 1000, &dxl_error);
+    //packetHandler->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 850, &dxl_error);
+  }
+}
+
+
+
