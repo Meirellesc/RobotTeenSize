@@ -59,9 +59,9 @@ for i in range(0,4):
 
     try:
 #        print servos, tipo
-        portahead = "/dev/ttyUSB1"
+        portahead = "/dev/ttyUSB0"
 #            print "portahead", portahead
-        portabody = "/dev/ttyUSB2"
+        portabody = "/dev/ttyUSB1"
 #            print "portabody", portabody
     except:
         print "nao tem servo conectado"

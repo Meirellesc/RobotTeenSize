@@ -130,3 +130,13 @@ export GIT_PS1_SHOWDIRTYSTATE=1
 # '\$(__git_ps1)' adds git-related stuff
 # '\W' adds the name of the current directory
 export PS1="$green\u@\h$red\$(__git_ps1)$blue \W $ $reset"
+
+
+export PYTHONPATH=/usr/lib/python2.7
+export PYTHONPATH=~/models/research/object_detection/utils
+export PYTHONPATH=~/models/research/object_detection
+export PYTHONPATH=$PYTHONPATH:/models/research/slim
+#PATH=/home/fei/bin:/home/fei/:.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+export PYTHONPATH=~/models/research/slim:~/models/research/object_detection/utils:~/models/research:$PYTHONPATH
+export PATH=~/.local/bin:$PATH
+
