@@ -127,6 +127,8 @@ sudo -H pip install scikit-image
 #Protobuth
 sudo -H pip install protobuf
 
+#Pandas to use in vision.py
+sudo apt -y install python-pandas
 
 #============================Install Opencv 3===================================================================
 light_Green='\e[1;32m'
