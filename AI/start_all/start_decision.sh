@@ -16,4 +16,4 @@ cd Decision/src/
 #python decision.py --naive_imu_dec_turning
 #python decision.py -nidt    #esse e o comportamento padrao
 #python decision.py -ni
-python decision.py -g  #goleiro
+python decision.py -nidt  #goleiro
