@@ -127,6 +127,8 @@ sudo -H pip install scikit-image
 #Protobuth
 sudo -H pip install protobuf
 
+#Pandas to use in vision.py
+sudo apt -y install python-pandas
 
 #============================Install Opencv 3===================================================================
 light_Green='\e[1;32m'
@@ -238,6 +240,20 @@ if sudo -H apt install pyqt4-dev-tools && sudo -H pip install lxml && make qt4py
 fi
 
 
+#=========================================================================================================================
+
+
+
+#=============================Compile the Control Framework===============================================================
+cd AI/Control/Linux/build_Framework/
+make clean
+make
+#=========================================================================================================================
+
+#=============================Compile the Dynamixel Framework of Control process==========================================
+cd ../..
+cd Framework/Framework_Dynamixel/
+make
 #=========================================================================================================================
 
 
