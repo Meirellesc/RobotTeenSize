@@ -6,4 +6,4 @@ export PYTHONPATH=~/models/research/slim:~/models/research/object_detection/util
 export PYTHONPATH=$PYTHONPATH:~/models/research/slim:~/models/research/object_detection:~/models/research
 cd ../Vision/src/
 
-python vision.py --ws  #ws=chamar a visao sem os motores
+python vision.py   #ws=chamar a visao sem os motores
