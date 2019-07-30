@@ -749,15 +749,15 @@ void logInit()
 	    printf("Erro ao Salvar o arquivo\n");
 }
 
-void PidMotion(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)//Molina 
+void PidMotion(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler)
 {
   for(int l = 1; l <=18 ;l++)
   {
 //    cout<<"Torque alto"<<endl;
     uint8_t dxl_error = 0;
-    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1600, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 3000, &dxl_error);
     packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
-    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 3840, &dxl_error);
+    packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 2000, &dxl_error);
     packetHandler->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 885, &dxl_error);
   }
 }
@@ -766,27 +766,11 @@ void PidStatic(dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *
 {
 //    cout<<"Torque baixo"<<endl;
     uint8_t dxl_error = 0;
-  for(int l = 1; l <=8 ;l++)
-  {
-		packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1000, &dxl_error);
-                packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 50, &dxl_error);
-		packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 400, &dxl_error);
-		packetHandler->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 600, &dxl_error);
-  }
-  for(int l = 9; l <=10 ;l++)
-  {
-		packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 8000, &dxl_error);
-                packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
-		packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 5000, &dxl_error);
-		//m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 600, &dxl_error);
-  }
-
-  for(int l = 11; l <=18 ;l++)
+  for(int l = 1; l <=18 ;l++)
   {
     packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_D_GAIN, 1000, &dxl_error);
     packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_I_GAIN, 0, &dxl_error);
     packetHandler->write2ByteTxRx(portHandler, l, MX28::P_POSITION_P_GAIN, 1000, &dxl_error);
-    //m_CM730->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 850, &dxl_error);
+    //packetHandler->write2ByteTxRx(portHandler, l, MX28::P_GOAL_PWM, 850, &dxl_error);
   }
-
 }
