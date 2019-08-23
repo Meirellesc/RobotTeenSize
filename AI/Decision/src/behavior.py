@@ -501,7 +501,7 @@ class NaiveIMUDecTurning(TreatingRawData):
             self.set_stand_still()
             self.larc_kickoff =0 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
             self.set_walk_forward()
-            time.sleep(15)
+            time.sleep(14)
             self.set_turn_left()
             #self.set_turn_right()
             time.sleep(5)
