@@ -499,8 +499,15 @@ class NaiveIMUDecTurning(TreatingRawData):
             print 'ready'
             #new rule: the robot must to enter in the soccer field
             self.set_stand_still()
-            self.larc_kickoff = 1 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
-            
+            self.larc_kickoff =0 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
+            self.set_walk_forward()
+            time.sleep(15)
+            self.set_turn_left()
+            #self.set_turn_right()
+            time.sleep(5)
+            self.set_stand_still()
+            time.sleep(25)
+            self
             #ele apenas anda, sem procurar a bola. No set ele começa a procurar.
             #talvez seja necessário retirar o if da linha 486, onde ele anda por 20 segundos.
             #self.set_vision_ball()
