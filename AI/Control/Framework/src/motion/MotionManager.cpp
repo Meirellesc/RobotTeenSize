@@ -327,8 +327,8 @@ void MotionManager::Process()
     {
 
           const double GYRO_ALPHA = 0.1;
-          int gyroValFB = (int) (read_int(mem, IMU_GYRO_Y)*16);
-          int gyroValRL = (int) (-read_int(mem, IMU_GYRO_X)*16);
+          int gyroValFB = (int) (-read_int(mem, IMU_GYRO_Y)*16);
+          int gyroValRL = (int) (read_int(mem, IMU_GYRO_X)*16);
 
 
 //          const double GYRO_ALPHA = 0.1;
