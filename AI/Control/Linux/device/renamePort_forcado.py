@@ -79,7 +79,7 @@ try:
 except:
     print(sys.exc_info())
     print "Não foi possivel criar as regras head"
-    print "Verifique se a chave que liga os servos motores está na posição ligada."
+    print "Verifique se a chave que liga os servos motores está na posição ligada seu bobo."
     
 try:
     BODYserial, BODYidProduct, BODYidVendor = findInfo(portabody)
@@ -89,7 +89,7 @@ try:
 except:
     print(sys.exc_info())
     print "Não foi possivel criar as regras body"
-    print "Verifique se a chave que liga os servos motores está na posição ligada."
+    print "Verifique se a chave que liga os servos motores está na posição ligada seu bobo."
 
 
 exit(0)

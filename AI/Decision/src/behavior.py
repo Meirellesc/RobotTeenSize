@@ -469,6 +469,7 @@ class NaiveIMU(TreatingRawData):
                     print referee
 
 #############################################################################
+#ESSA QUE  É A QUE IMPORTA ATUALMENTE - RODRIGO
 
 class NaiveIMUDecTurning(TreatingRawData):
     " " " Naive class " " "
@@ -498,9 +499,16 @@ class NaiveIMUDecTurning(TreatingRawData):
             print 'ready'
             #new rule: the robot must to enter in the soccer field
             self.set_stand_still()
-            self.larc_kickoff = 1 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
-            
-            #ele apenas anda, sem procurar a bola. no set ele começa a procurar.
+            self.larc_kickoff =0 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
+            self.set_walk_forward()
+            time.sleep(14)
+            self.set_turn_left()
+            #self.set_turn_right()
+            time.sleep(5)
+            self.set_stand_still()
+            time.sleep(25)
+            self
+            #ele apenas anda, sem procurar a bola. No set ele começa a procurar.
             #talvez seja necessário retirar o if da linha 486, onde ele anda por 20 segundos.
             #self.set_vision_ball()
 
@@ -536,12 +544,12 @@ class NaiveIMUDecTurning(TreatingRawData):
             ###############################
             #optei por fazer ele andar durante os 30s do ready e no set, ele olhar pra bola e se alinhar com ela.
             self.set_vision_ball()
-            if self.get_search_status() == 0:  # 0 - object found
-                # align to the ball
+            if self.get_search_status() == 0:  # 0 - object found ACHOU A PORCARIA DA BOLA
+                # align to the ball  TENTANDO SE ALINHAR COM LA PELOTA
                 if self.get_motor_pan_degrees() >= 60:  #30 ou 60
-                    self.set_turn_left()
+                    self.set_turn_left() # VIRAR A EQUERDA PQ A BOLA TA LÁ
                 elif self.get_motor_pan_degrees() <= -60: #-30 ou -60
-                    self.set_turn_right()
+                    self.set_turn_right()# VIRAR A DIREITA PQ A BOLA TA LÁ
             else: #a bola esta alinhada, fica parado.
                 self.set_stand_still()
 
@@ -554,8 +562,9 @@ class NaiveIMUDecTurning(TreatingRawData):
        #         time.sleep(1)
        #         print "time", i
        #     self.kickoff_ctrl = 1
-
-        elif referee == 2 and self.kickoff_ctrl == 0 and self.get_search_status() == 1:
+       
+        #SE PÁ O B.O MORA AQUI EMBAIXO NESSE ELIF DUVIDOSO
+        elif referee == 2 and self.kickoff_ctrl == 0 and self.get_search_status() == 1: # JUIZ DEU PLAY E ROBÔ N TA VENDO A BOLA
             self.ready_walk = 0
             self.set_vision_ball()
             for i in range(0,5):   #### - Entra no campo se nao estiver ouvindo juiz - 20
@@ -572,7 +581,7 @@ class NaiveIMUDecTurning(TreatingRawData):
             print 'orientation', self.get_orientation()
 
 
-        #ver pra que serve isso
+            #ver pra que serve isso
             #self.set_walk_forward_slow(1000)
             #time.sleep(22)
             #self.set_turn_left()
@@ -580,15 +589,15 @@ class NaiveIMUDecTurning(TreatingRawData):
             #self.set_stand_still()
 
 
-            #do not kick twice - it is not funcionning!!
+            #do not kick twice - it is not funcionning!! - NÃO CHUTAR DUAS VEZES 
 #            if self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 4 or self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 5:
-#        print 'nao chutei pq to aqui!'
+#        print 'nao chutei pq to aqui!'  -- ??????????
 #                self.set_stand_still()
             if self.bkb.read_int(self.mem, 'CONTROL_MOVING') == 1 and self.flag_move_ac==True:
                 self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 0) # Writing in the memory
                 self.flag_move_ac=False
 
-            if self.get_search_status() == 1: # 1 - vision lost
+            if self.get_search_status() == 1: # 1 - vision lost - PERDEU A BOLA
                 print 'vision lost'
                 self.set_stand_still()
                 for __ in xrange(10):
@@ -605,12 +614,7 @@ class NaiveIMUDecTurning(TreatingRawData):
                 self.set_stand_still()  
            
                    
-                   
-                
-                                 
-                          
-              
-             
+
                 # for __ in xrange(20):
                 #    time.sleep(1)
                 #    if self.get_search_status() == 0:
@@ -618,9 +622,9 @@ class NaiveIMUDecTurning(TreatingRawData):
                 #thiago decision
                 #self.set_vision_search()
                 #self.set_turn_right()
-            if self.get_search_status() == 0: # 0 - object found
-        #print 'entre found'
-                # align to the ball
+            if self.get_search_status() == 0: # 0 - object found - ACHOU A BOLA
+                #print 'entre found'
+                # align to the ball - TENTANDO ALINHAR COM A BOLA
                 self.set_vision_ball()
                 if self.get_motor_pan_degrees() == 60:
                     self.set_turn_left()
@@ -630,7 +634,7 @@ class NaiveIMUDecTurning(TreatingRawData):
                     #self.set_stand_still()
                 else:
                     print self.get_orientation()
-                    if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
+                    if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:#TENTANDO CHUTAR DE DIREITA
                         #print 'entrei'
                         if self.get_orientation() <= 30 and self.get_orientation() >= -30:
                             if self.larc_kickoff==0:
@@ -644,17 +648,17 @@ class NaiveIMUDecTurning(TreatingRawData):
 #                                time.sleep(4)
 #                                self.set_walk_forward()
 #                                self.set_stand_still()
-                        elif self.get_orientation() > 30:
+                        elif self.get_orientation() > 30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
                             #revolve_clockwise:
                             #self.set_pass_right()
                             self.set_revolve_around_ball_clockwise()
                             #########
-                        elif self.get_orientation() < -30:
+                        elif self.get_orientation() < -30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
                             #revolve_anticlockwise:
                             #self.set_pass_left()
                             self.set_revolve_around_ball_anticlockwise()
                             #########
-                    elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:
+                    elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:#TENTANDO CHUTAR DE ESQUERDA
                         if self.get_orientation() <= 30 and self.get_orientation() >= -30:
                             if self.larc_kickoff==0:
                                 self.set_kick_left()
@@ -667,12 +671,12 @@ class NaiveIMUDecTurning(TreatingRawData):
 #                                time.sleep(4)
 #                                self.set_walk_forward()
 #                                self.set_stand_still()
-                        elif self.get_orientation() > 30:
+                        elif self.get_orientation() > 30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
                             #revolve_clockwise:
                             #self.set_pass_right()
                             self.set_revolve_around_ball_clockwise()
                             #########
-                        elif self.get_orientation() < -30:
+                        elif self.get_orientation() < -30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
                             #revolve_anticlockwise:
                             #self.set_pass_left()
                             self.set_revolve_around_ball_anticlockwise()
@@ -689,7 +693,7 @@ class NaiveIMUDecTurning(TreatingRawData):
                          #time.sleep(0.2)
                          #self.set_stand_still()
         else:
-            print 'Invalid argument received from referee!'
+            print 'Invalid argument received from referee! Tendi nada que o juiz disse'
             print referee
 
 #############################################################################

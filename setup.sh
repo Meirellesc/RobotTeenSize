@@ -55,6 +55,7 @@ then
 	    sudo make install
 	    cd ../../..
 		echo
+
 		echo -e "${blue} Installing whole software ${NC}"
 		cd AI
 		mkdir build
@@ -117,7 +118,12 @@ else
 	cmake ../
 	make all
 	sudo make install
-	cd ../../..
+	cd ../../../..
+
+    echo -e "${blue} Installing Dynamixel framework ${NC}"
+    cd AI/Control/Framework/Framework_Dynamixel
+    make
+    cd ../../../..
 
 	echo -e "${blue} Installing whole software ${NC}"
 	cd AI

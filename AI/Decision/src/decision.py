@@ -63,10 +63,11 @@ elif args.naive_imu_dec_turning == True:
 else:
     robot = Ordinary()
 
+#time.sleep(30)
 
 #loop
 while True:
-
+    print(robot.get_referee_usage())
     if robot.get_referee_usage() == 'yes':
         robot.decision(2) #will read the referee 
     else:

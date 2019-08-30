@@ -287,15 +287,15 @@ void ActionMove::kick_right_strong(dynamixel::PacketHandler *cm730, bool &stop_g
     cm730->write4ByteTxRx(portHandler, 15, 112, uint32_t(1023), &dxl_error);//1068
     cm730->write4ByteTxRx(portHandler, 17, 112, uint32_t(48), &dxl_error);//50
 
-    cm730->write4ByteTxRx(portHandler, 11, 116, uint32_t(MotionManager::GetInstance()->m_Offset[11]+1171), &dxl_error);
-    cm730->write4ByteTxRx(portHandler, 13, 116, uint32_t(MotionManager::GetInstance()->m_Offset[13]+2320), &dxl_error);
-    cm730->write4ByteTxRx(portHandler, 15, 116, uint32_t(MotionManager::GetInstance()->m_Offset[15]+1554), &dxl_error);
-    cm730->write4ByteTxRx(portHandler, 17, 116, uint32_t(MotionManager::GetInstance()->m_Offset[17]+1990), &dxl_error);
+    cm730->write4ByteTxRx(portHandler, 11, 116, uint32_t(MotionManager::GetInstance()->m_Offset[11]+1313), &dxl_error);
+    cm730->write4ByteTxRx(portHandler, 13, 116, uint32_t(MotionManager::GetInstance()->m_Offset[13]+2114), &dxl_error);
+    cm730->write4ByteTxRx(portHandler, 15, 116, uint32_t(MotionManager::GetInstance()->m_Offset[15]+1507), &dxl_error);
+    cm730->write4ByteTxRx(portHandler, 17, 116, uint32_t(MotionManager::GetInstance()->m_Offset[17]+2040), &dxl_error);
 
         //Esperando  completar o movimento
     unsigned int count_s = 0;
     uint8_t value = 0;
-    usleep(80*1000);
+    usleep(8*1000);
 
     cm730->read1ByteTxRx(portHandler, 15, 122, &value, &dxl_error);
     while(value!=0)

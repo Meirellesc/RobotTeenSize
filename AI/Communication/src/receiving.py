@@ -31,7 +31,7 @@ bkb.write_int(mem,'ROBOT_NUMBER',rbt_number)
 
 UDP_IP = "255.255.255.255"
 # UDP_PORT1 = 3939
-# UDP_PORT2 = 3838
+#UDP_PORT2 = 3838
 # UDP_PORT3 = 3737
 # UDP_PORT4 = 3636
 
