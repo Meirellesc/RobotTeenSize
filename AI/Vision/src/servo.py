@@ -21,7 +21,7 @@ class Servo(object):
     DXL_ID                      = 1                 # Dynamixel ID : 1
     BAUDRATE                    = 1000000             # Dynamixel default baudrate : 57600
     DEVICENAME                  = '/dev/robot/head'
-    #DEVICENAME                  = '/dev/ttyUSB1'    # Check which port is being used on your controller
+    #DEVICENAME                  = '/dev/ttyUSB0'    # Check which port is being used on your controller
                                                     # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
     TORQUE_ENABLE               = 1                 # Value for enabling the torque

@@ -201,7 +201,7 @@ class objectDetect():
 
 
 
-        if(df['scores'][0]>0.80):
+        if(df['scores'][0]>0.60):
             height, width = frame.shape[:2]
             print df['boxes'][0][0]
             #      print df.head()

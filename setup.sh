@@ -130,17 +130,27 @@ else
 	sudo echo  -e "Creating rules for recognizing device${red} IMU${NC}"
 	cat <<EOF > 41-ftdi-imu.rules
 	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="067b",  ATTRS{idProduct}=="2303", MODE="0777", SYMLINK+="robot/imu"
-	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="A9K3FL1T" MODE="0777", SYMLINK+="robot/imu"
+	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="A9IHL3ZZ" MODE="0777", SYMLINK+="robot/imu"
 EOF
 	chmod +x 41-ftdi-imu.rules
 	cat <<EOF > 80-latency_USB.rules
 	ACTION=="add", SUBSYSTEM=="usb-serial", DRIVER=="ftdi_sio", ATTR{latency_timer}="1"
 EOF
+    cat <<EOF > 41-ftdi-body.rules
+	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="AH01CCHF" MODE="0777", SYMLINK+="robot/body"
+EOF
+    cat <<EOF > 41-ftdi-head.rules
+	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="0000",ATTRS{serial}=="A9AHDJVJ" MODE="0777", SYMLINK+="robot/head"
+EOF
 	chmod +x 80-latency_USB.rules
 	sudo echo  -e "Copying file${blue} 41-ftdi-imu.rules 80-latency_USB.rules${NC} to ${green}/etc/udev/rules.d${NC}"
 	sudo cp  41-ftdi-imu.rules  /etc/udev/rules.d
+    sudo cp  41-ftdi-body.rules  /etc/udev/rules.d
+    sudo cp  41-ftdi-head.rules  /etc/udev/rules.d
 	sudo cp 80-latency_USB.rules /etc/udev/rules.d
 	rm 41-ftdi-imu.rules
+    rm 41-ftdi-body.rules
+    rm 41-ftdi-head.rules
 	rm 80-latency_USB.rules
 
 	sudo echo  -e "Creating rules for recognizing devices${red} Servo${NC}"
