@@ -209,12 +209,15 @@ class SampleGameStateReceiver(GameStateReceiver):
         elif state.game_state == "STATE_SET":
             print ("set")
             bkb.write_int(mem,'COM_REFEREE',12)
+        elif state.game_state == "STATE_FINISHED":
+            print ("acabou eh tetra")
+            bkb.write_int(mem,'COM_REFEREE',3)
         elif state.kick_of_team == TEAM_ROBOFEI  and state.game_state == "STATE_PLAYING" and (state.secondary_state == "STATE_NORMAL" or state.secondary_state == "STATE_OVERTIME"):
             print ("play kickoff RoboFEI")
-            bkb.write_int(mem,'COM_REFEREE',2)
+            bkb.write_int(mem,'COM_REFEREE',20)
         elif state.kick_of_team != TEAM_ROBOFEI  and state.game_state == "STATE_PLAYING" and (state.secondary_state == "STATE_NORMAL" or state.secondary_state == "STATE_OVERTIME"):
             print ("play kickoff opponent")
-            bkb.write_int(mem,'COM_REFEREE',2)
+            bkb.write_int(mem,'COM_REFEREE',21)
 #verificar: freekick primeiro congela o robô, depois executa.
 #pela regra, como faz? o robô vai até a bola? ver a regra.
 #o mesmo vale para o penaltykick. 
@@ -237,7 +240,7 @@ class SampleGameStateReceiver(GameStateReceiver):
             print ("timeout")
             bkb.write_int(mem,'COM_REFEREE',1)
         else:
-            print ("não reconheci o comando...vamos jogar!")
+            print ("não reconheci o comando...vamo no xesque!")
             bkb.write_int(mem,'COM_REFEREE',2)
 
 

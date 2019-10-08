@@ -69,7 +69,7 @@ else:
 while True:
     print(robot.get_referee_usage())
     if robot.get_referee_usage() == 'yes':
-        robot.decision(2) #will read the referee 
+        robot.decision(robot.get_referee()) #will read the referee 
     else:
         robot.decision(2) #always on play
 
