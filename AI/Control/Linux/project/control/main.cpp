@@ -597,6 +597,14 @@ int Initialize_servo(dynamixel::PacketHandler *packetHandler, dynamixel::PortHan
     dxl_comm_result = packetHandler->broadcastPing(portHandler, vec);
     if (dxl_comm_result != COMM_SUCCESS)
     {
+//     for (int a = 0; a <101; a++)
+//       {if (dxl_comm_result != COMM_SUCCESS)
+//        {
+//          cout<<"tentativa "<<a<<" de detecção"<<endl;
+//          usleep(500000);
+////          return 1;
+//        }
+//       }  
       printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com nenhum servo.\e[0m\n");
       std::cout<<"Endereço: "<<"/dev/robot/body"<<std::endl;
       std::cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<std::endl;

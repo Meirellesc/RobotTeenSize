@@ -6,4 +6,4 @@ echo "control"
 cd ..
 cd build/Control/
 
-echo 123456 | sudo -S ./control
+echo 123456 | sudo -S ./control 

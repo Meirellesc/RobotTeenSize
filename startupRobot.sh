@@ -176,6 +176,7 @@ sleep 1
 
 #============================Install Tensorflow================================================================================
 
+#from pip import main   //arrumar pip linha 7 do arquivo pip no diretorio cd /usr/local/bin/
 
 echo -e "${blue}Install TensorFlow${NC}";
 sudo pip install tensorflow==1.10.1      # for Python 2.7

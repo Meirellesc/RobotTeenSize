@@ -488,10 +488,10 @@ class NaiveIMUDecTurning(TreatingRawData):
         print self.get_motor_tilt_degrees()
         print "referee", referee
         print 'search status ', self.get_search_status()
-        self.kickoff_ctrl = 1
+        #self.kickoff_ctrl = 1
 
         if referee == 1:  # stopped
-            self.ready_walk = 0
+            #self.ready_walk = 0
             print 'stand'
             self.set_stand_still()
 
@@ -499,15 +499,15 @@ class NaiveIMUDecTurning(TreatingRawData):
             print 'ready'
             #new rule: the robot must to enter in the soccer field
             self.set_stand_still()
-            self.larc_kickoff =0 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
-            self.set_walk_forward()
-            time.sleep(14)
+            #self.larc_kickoff =0 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
+            #self.set_walk_forward()
+            #time.sleep(14)
             self.set_turn_left()
             #self.set_turn_right()
-            time.sleep(5)
+            #time.sleep(5)
             self.set_stand_still()
-            time.sleep(25)
-            self
+            #time.sleep(25)
+            #self
             #ele apenas anda, sem procurar a bola. No set ele começa a procurar.
             #talvez seja necessário retirar o if da linha 486, onde ele anda por 20 segundos.
             #self.set_vision_ball()
@@ -529,9 +529,9 @@ class NaiveIMUDecTurning(TreatingRawData):
 
 
         elif referee == 12:  # set
-            self.ready_walk = 0
+            #self.ready_walk = 0
             print 'set'
-            #self.set_stand_still()
+            self.set_stand_still()
             ###############################
             #aqui não dá pra usar a IMU. Pq funcionaria em um lado do campo (entra e vira à direita)...
             #mas do outro lado, não daria: entra e vira à esquerda. Precisaria trocar a funcao no intervalo.
@@ -550,8 +550,12 @@ class NaiveIMUDecTurning(TreatingRawData):
                     self.set_turn_left() # VIRAR A EQUERDA PQ A BOLA TA LÁ
                 elif self.get_motor_pan_degrees() <= -60: #-30 ou -60
                     self.set_turn_right()# VIRAR A DIREITA PQ A BOLA TA LÁ
-            else: #a bola esta alinhada, fica parado.
+                else:#a bola esta alinhada,fica parado
+                   self.set_stand_still()
+                   print 'stand seu bobo'
+            else: #cadê a bola produção?
                 self.set_stand_still()
+                print 'stand feito bobo'
 
 
        # elif referee == 21 and self.kickoff_ctrl == 0:
@@ -574,7 +578,7 @@ class NaiveIMUDecTurning(TreatingRawData):
 
 
        # elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
-        elif referee == 2:  # play
+        elif referee == 20:  # play
             self.ready_walk = 0
             self.kickoff_ctrl = 1
             #print 'dist_ball', self.get_dist_ball()
@@ -623,7 +627,7 @@ class NaiveIMUDecTurning(TreatingRawData):
                 #self.set_vision_search()
                 #self.set_turn_right()
             if self.get_search_status() == 0: # 0 - object found - ACHOU A BOLA
-                #print 'entre found'
+                print 'ball found'
                 # align to the ball - TENTANDO ALINHAR COM A BOLA
                 self.set_vision_ball()
                 if self.get_motor_pan_degrees() == 60:
@@ -638,60 +642,185 @@ class NaiveIMUDecTurning(TreatingRawData):
                         #print 'entrei'
                         if self.get_orientation() <= 30 and self.get_orientation() >= -30:
                             if self.larc_kickoff==0:
+                                print 'chute de direita'
                                 self.set_kick_right()
                                 time.sleep(4)
                             else:
                                 self.larc_kickoff=0
                                 time.sleep(0.5)
-                                self.set_walk_forward()
+                                #self.set_walk_forward()
+                                print 'chute de direita fraco pq n teve kickoff'
                                 self.kick_right_weak()
-#                                time.sleep(4)
+                                time.sleep(4)
 #                                self.set_walk_forward()
 #                                self.set_stand_still()
                         elif self.get_orientation() > 30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
                             #revolve_clockwise:
                             #self.set_pass_right()
-                            self.set_revolve_around_ball_clockwise()
+                             print 'girando girando girando pro gol sentido horário'
+                             self.set_revolve_around_ball_clockwise()
                             #########
                         elif self.get_orientation() < -30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
                             #revolve_anticlockwise:
                             #self.set_pass_left()
-                            self.set_revolve_around_ball_anticlockwise()
+                             print 'girando girando girando pro gol sentido horário'
+                             self.set_revolve_around_ball_anticlockwise()
                             #########
                     elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:#TENTANDO CHUTAR DE ESQUERDA
                         if self.get_orientation() <= 30 and self.get_orientation() >= -30:
                             if self.larc_kickoff==0:
+                                print 'chuta de esquerda'
                                 self.set_kick_left()
                                 time.sleep(2)
                             else:
                                 self.larc_kickoff=0
                                 time.sleep(0.5)
-                                self.set_walk_forward()
+                                #self.set_walk_forward()
+                                print 'chuta fraco para esquerda pq n teve kickoff'
                                 self.kick_left_weak()
-#                                time.sleep(4)
+                                time.sleep(4)
 #                                self.set_walk_forward()
 #                                self.set_stand_still()
                         elif self.get_orientation() > 30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
                             #revolve_clockwise:
                             #self.set_pass_right()
+                            print 'girando girando girando pro gol sentido horário'
                             self.set_revolve_around_ball_clockwise()
                             #########
                         elif self.get_orientation() < -30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
                             #revolve_anticlockwise:
                             #self.set_pass_left()
+                            print 'girando girando girando pro gol sentido horário'
                             self.set_revolve_around_ball_anticlockwise()
                             #########
+                    elif self.get_motor_tilt_degrees() == 45: #longe
+                        print 'bola está no meio'
+                        self.set_walk_forward()
                     elif self.get_motor_tilt_degrees() == 70: #longe
+                        print 'bola tá longe'
                         self.set_walk_forward()
                         #self.set_walk_forward_slow((self.get_dist_ball() / 5))
                     #elif self.get_dist_ball() <= 26:
                     #    self.set_stand_still()
                     #self.get_motor_tilt_degrees == 45: #meio longe
                     else:
+                        print 'nada reconhecido,nem bola perto nem longe'
                         self.set_walk_forward_slow((self.get_dist_ball() / 6))
+                         #time.sleep(0.2)
+                         #self.set_stand_still()
+        elif referee == 21:  # play sem kickoff  --qualquer coisa comenta isso tudo ate o 3
+            self.ready_walk = 0
+            #self.kickoff_ctrl = 1
+            #print 'dist_ball', self.get_dist_ball()
+            print 'orientation', self.get_orientation()
+
+
+            #ver pra que serve isso
+            #self.set_walk_forward_slow(1000)
+            #time.sleep(22)
+            #self.set_turn_left()
+            #time.sleep(7)
+            #self.set_stand_still()
+
+
+            #do not kick twice - it is not funcionning!! - NÃO CHUTAR DUAS VEZES 
+#            if self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 4 or self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 5:
+#        print 'nao chutei pq to aqui!'  -- ??????????
+#                self.set_stand_still()
+            if self.bkb.read_int(self.mem, 'CONTROL_MOVING') == 1 and self.flag_move_ac==True:
+                self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 0) # Writing in the memory
+                self.flag_move_ac=False
+
+            if self.get_search_status() == 1: # 1 - vision lost - PERDEU A BOLA
+                print 'vision lost'
+                self.set_stand_still()
+                for __ in xrange(10):
+                          if self.get_search_status() == 1:
+                                   self.set_turn_right()
+                                   time.sleep(1)                              
+                          if self.get_search_status() == 0:
+                                   self.set_stand_still()
+                                   self.set_vision_ball()
+                                   time.sleep(1)
+                                   break
+                          if referee==2:
+                                   break
+                self.set_stand_still()  
+           
+                   
+
+                # for __ in xrange(20):
+                #    time.sleep(1)
+                #    if self.get_search_status() == 0:
+                #        break
+                #thiago decision
+                #self.set_vision_search()
+                #self.set_turn_right()
+            if self.get_search_status() == 0: # 0 - object found - ACHOU A BOLA
+                print 'ball found'
+                # align to the ball - TENTANDO ALINHAR COM A BOLA
+                self.set_vision_ball()
+                if self.get_motor_pan_degrees() == 60:
+                    self.set_turn_left()
+                    #self.set_stand_still()
+                elif self.get_motor_pan_degrees() == -60:
+                    self.set_turn_right()
+                    #self.set_stand_still()
+                else:
+                    print self.get_orientation()
+                    if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:#TENTANDO CHUTAR DE DIREITA
+                        #print 'entrei'
+                        if self.get_orientation() <= 30 and self.get_orientation() >= -30:
+                            print 'chute de direita'
+                            self.set_kick_right()
+                            time.sleep(4)
+                        elif self.get_orientation() > 30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
+                            #revolve_clockwise:
+                            #self.set_pass_right()
+                            print 'girando girando girando pro gol oponente sentido horario'
+                            self.set_revolve_around_ball_clockwise()
+                            #########
+                        elif self.get_orientation() < -30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
+                            #revolve_anticlockwise:
+                            #self.set_pass_left()
+                            print 'girando girando girando pro gol oponente sentido anti horario'
+                            self.set_revolve_around_ball_anticlockwise()
+                            #########
+                    elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:#TENTANDO CHUTAR DE ESQUERDA
+                        if self.get_orientation() <= 30 and self.get_orientation() >= -30:
+                            print 'chute de esquerda'
+                            self.set_kick_left()
+                            time.sleep(4)
+                        elif self.get_orientation() > 30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
+                            #revolve_clockwise:
+                            #self.set_pass_right()
+                            print 'girando girando girando pro gol oponente sentido horario'
+                            self.set_revolve_around_ball_clockwise()
+                            #########
+                        elif self.get_orientation() < -30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
+                            #revolve_anticlockwise:
+                            #self.set_pass_left()
+                            print 'girando girando girando pro gol oponente sentido anti horario'
+                            self.set_revolve_around_ball_anticlockwise()
+                            #########
+                    elif self.get_motor_tilt_degrees() == 70: #longe
+                        print 'bola ta longe'
+                        self.set_walk_forward()
+                        #self.set_walk_forward_slow((self.get_dist_ball() / 5))
+                    #elif self.get_dist_ball() <= 26:
+                    #    self.set_stand_still()
+                    #self.get_motor_tilt_degrees == 45: #meio longe
+                    else:
+                        print 'nada reconhecido, nem bola perto nem longe'
+                        self.set_walk_forward((self.get_dist_ball() / 6))
 
                          #time.sleep(0.2)
                          #self.set_stand_still()
+        elif referee==3:
+            self.greetings()
+            time.sleep(10)
+            self.set_stand_still()
+            print'CABOU O JOGO RAPAZIADA'
         else:
             print 'Invalid argument received from referee! Tendi nada que o juiz disse'
             print referee
