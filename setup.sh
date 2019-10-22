@@ -125,6 +125,10 @@ else
     make
     cd ../../../..
 
+    echo -e "${blue} Installing construct ${NC}"
+    sudo pip install construct==2.5.3
+
+
 	echo -e "${blue} Installing whole software ${NC}"
 	cd AI
 	mkdir build
