@@ -136,46 +136,28 @@ else
 	sudo echo  -e "Creating rules for recognizing device${red} IMU${NC}"
 	cat <<EOF > 41-ftdi-imu.rules
 	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="067b",  ATTRS{idProduct}=="2303", MODE="0777", SYMLINK+="robot/imu"
-<<<<<<< HEAD
-	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="A6022L8O" MODE="0777"
-=======
 	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="A9IHL3ZZ" MODE="0777", SYMLINK+="robot/imu"
->>>>>>> 3eb88512e2f96314cfd37aa98e85d18c5dcf87c2
 EOF
 	chmod +x 41-ftdi-imu.rules
 	cat <<EOF > 80-latency_USB.rules
 	ACTION=="add", SUBSYSTEM=="usb-serial", DRIVER=="ftdi_sio", ATTR{latency_timer}="1"
-#EOF -- Regra da placa 2
-#    cat <<EOF > 41-ftdi-body.rules
-#	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="AH01CCHF" MODE="0777", SYMLINK+="robot/body"
-#EOF
-#    cat <<EOF > 41-ftdi-head.rules
-#	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="0000",ATTRS{serial}=="A9AHDJVJ" MODE="0777", SYMLINK+="robot/head"
 EOF
-<<<<<<< HEAD
-#  regra da placa 1
-#    cat <<EOF > 41-ftdi-body.rules
-#	    KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="DC1UWX09190303F" MODE="0777"
-#EOF
-#    cat <<EOF > 41-ftdi-head.rules
-#	    KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="AH01CCHH" MODE="0777"
-#EOF
-	    chmod +x 80-latency_USB.rules
-	    sudo echo  -e "Copying file${blue} 41-ftdi-imu.rules 80-latency_USB.rules${NC} to ${green}/etc/udev/rules.d${NC}"
-	    sudo cp  41-ftdi-imu.rules  /etc/udev/rules.d
-        sudo cp  41-ftdi-body.rules  /etc/udev/rules.d
-        sudo cp  41-ftdi-head.rules  /etc/udev/rules.d
-	    sudo cp 80-latency_USB.rules /etc/udev/rules.d
-	    rm 41-ftdi-imu.rules
-        rm 41-ftdi-body.rules
-        rm 41-ftdi-head.rules
-	    rm 80-latency_USB.rules
-=======
     cat <<EOF > 41-ftdi-body.rules
 	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="AH01CCHF" MODE="0777", SYMLINK+="robot/body"
 EOF
     cat <<EOF > 41-ftdi-head.rules
-	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="0000",ATTRS{serial}=="A9AHDJVJ" MODE="0777", SYMLINK+="robot/head"
+	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="A907KWGL" MODE="0777", SYMLINK+="robot/head"
+# numer (pi)
+#EOF
+#	chmod +x 41-ftdi-imu.rules
+#	cat <<EOF > 80-latency_USB.rules
+#	ACTION=="add", SUBSYSTEM=="usb-serial", DRIVER=="ftdi_sio", ATTR{latency_timer}="1"
+#EOF
+#    cat <<EOF > 41-ftdi-body.rules
+#	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="DC1UWX09190205V" MODE="0777", SYMLINK+="robot/body"
+#EOF
+#    cat <<EOF > 41-ftdi-head.rules
+#	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="IL000008" MODE="0777", SYMLINK+="robot/head"
 EOF
 	chmod +x 80-latency_USB.rules
 	sudo echo  -e "Copying file${blue} 41-ftdi-imu.rules 80-latency_USB.rules${NC} to ${green}/etc/udev/rules.d${NC}"
@@ -187,7 +169,6 @@ EOF
     rm 41-ftdi-body.rules
     rm 41-ftdi-head.rules
 	rm 80-latency_USB.rules
->>>>>>> 3eb88512e2f96314cfd37aa98e85d18c5dcf87c2
 
 	sudo echo  -e "Creating rules for recognizing devices${red} Servo${NC}"
     sudo python ./AI/Control/Linux/device/renamePort.py
