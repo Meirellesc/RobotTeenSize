@@ -240,11 +240,7 @@ class SampleGameStateReceiver(GameStateReceiver):
             print ("timeout")
             bkb.write_int(mem,'COM_REFEREE',1)
         else:
-<<<<<<< HEAD
-            print ("não reconheci o comando...vamos pro xesque!")
-=======
-            print ("não reconheci o comando...vamo no xesque!")
->>>>>>> 3eb88512e2f96314cfd37aa98e85d18c5dcf87c2
+            print ("não reconheci o comando  -  ???")
             bkb.write_int(mem,'COM_REFEREE',2)
 
 

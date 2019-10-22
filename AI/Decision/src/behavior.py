@@ -504,17 +504,10 @@ class NaiveIMUDecTurning(TreatingRawData):
             self.set_stand_still()
             #new rule: the robot must to enter in the soccer field
             self.set_stand_still()
-<<<<<<< HEAD
             #self.larc_kickoff =0 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
             #self.set_walk_forward()
             #time.sleep(14)
             self.set_turn_left()
-=======
-            #self.larc_kickoff =1 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
-            #self.set_walk_forward()
-            #time.sleep(14)
-            #self.set_turn_left()
->>>>>>> 3eb88512e2f96314cfd37aa98e85d18c5dcf87c2
             #self.set_turn_right()
             #time.sleep(5)
             self.set_stand_still()
@@ -544,10 +537,6 @@ class NaiveIMUDecTurning(TreatingRawData):
             #self.ready_walk = 0
             print 'set'
             self.set_stand_still()
-<<<<<<< HEAD
-=======
-            #self.set_stand_still()
->>>>>>> 3eb88512e2f96314cfd37aa98e85d18c5dcf87c2
             ###############################
             #aqui não dá pra usar a IMU. Pq funcionaria em um lado do campo (entra e vira à direita)...
             #mas do outro lado, não daria: entra e vira à esquerda. Precisaria trocar a funcao no intervalo.
@@ -566,7 +555,6 @@ class NaiveIMUDecTurning(TreatingRawData):
                     self.set_turn_left() # VIRAR A EQUERDA PQ A BOLA TA LÁ
                 elif self.get_motor_pan_degrees() <= -60: #-30 ou -60
                     self.set_turn_right()# VIRAR A DIREITA PQ A BOLA TA LÁ
-<<<<<<< HEAD
                 else:#a bola esta alinhada,fica parado
                    self.set_stand_still()
                    print 'stand seu bobo'
@@ -574,14 +562,6 @@ class NaiveIMUDecTurning(TreatingRawData):
                 self.set_stand_still()
                 print 'stand feito bobo'
 
-=======
-                else: #a bola esta alinhada, fica parado.
-                    self.set_stand_still()
-                    print 'stand seu bobo'
-            else: #cade a bola producao
-                self.set_stand_still()
-                print 'stand feito bobo'
->>>>>>> 3eb88512e2f96314cfd37aa98e85d18c5dcf87c2
 
        # elif referee == 21 and self.kickoff_ctrl == 0:
        #     print 'walking forward for vision to see anything'
@@ -603,11 +583,7 @@ class NaiveIMUDecTurning(TreatingRawData):
 
 
        # elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
-<<<<<<< HEAD
         elif referee == 20:  # play
-=======
-        elif referee == 20:  # play com kickoff
->>>>>>> 3eb88512e2f96314cfd37aa98e85d18c5dcf87c2
             self.ready_walk = 0
             self.kickoff_ctrl = 1
             #print 'dist_ball', self.get_dist_ball()
@@ -677,11 +653,7 @@ class NaiveIMUDecTurning(TreatingRawData):
                             else:
                                 self.larc_kickoff=0
                                 time.sleep(0.5)
-<<<<<<< HEAD
                                 #self.set_walk_forward()
-=======
-#                                self.set_walk_forward()
->>>>>>> 3eb88512e2f96314cfd37aa98e85d18c5dcf87c2
                                 print 'chute de direita fraco pq n teve kickoff'
                                 self.kick_right_weak()
                                 time.sleep(4)
@@ -690,13 +662,8 @@ class NaiveIMUDecTurning(TreatingRawData):
                         elif self.get_orientation() > 30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
                             #revolve_clockwise:
                             #self.set_pass_right()
-<<<<<<< HEAD
                              print 'girando girando girando pro gol sentido horário'
                              self.set_revolve_around_ball_clockwise()
-=======
-                            print 'girando girando girando pro gol oponente sentido horario'
-                            self.set_revolve_around_ball_clockwise()
->>>>>>> 3eb88512e2f96314cfd37aa98e85d18c5dcf87c2
                             #########
                         elif self.get_orientation() < -30:# CORRIGI SE O ROBÔ ESTÁ ALINHADO COM O GOL OPONENTE
                             #revolve_anticlockwise:
